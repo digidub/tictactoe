@@ -1,0 +1,22 @@
+.game-view {
+    width: 700px;
+    margin: 0 auto;
+}
+
+.board {
+    display: flex;
+    flex-flow: row wrap;
+    height: 500px;
+    justify-content: space-between;
+}
+
+.cell {
+    cursor: pointer;
+    background: #e8e8e8;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    width: 30%;
+    height: 28%;
+}
