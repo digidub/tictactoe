@@ -15,6 +15,10 @@ const GameBoard = () => {
     return {board};
 }
 
-//let game = gameBoard();
+//Player Object
+const Player = (name) => {
 
+    const sayName = () => console.log(`my name is ${name}`)
+    return {sayName};    
+}
 
