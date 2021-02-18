@@ -42,3 +42,41 @@
     width: 30%;
     height: 30%;
 }
+
+#piece-toggle {
+    text-align: right;
+    margin: .0em 0;
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+}
+
+#piece-toggle button {
+    padding: 5px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    background: 1px solid #eee;
+    cursor: pointer;
+    margin: 0em;
+}
+
+#piece-toggle button.X {
+    border-radius: 0 5px 5px 0;
+    color: #ec79ec;
+}
+
+#piece-toggle button.O {
+    border-right: none;
+    border-radius: 5px 0 0 5px;
+    color: #96ec79;
+}
+
+.O-selected {
+    cursor: auto;
+    color: #fff;
+}
+
+.X-selected {
+    cursor: auto;
+    color: #fff;
+}
