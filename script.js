@@ -6,7 +6,7 @@ const MakeGame = (() => {
         for (let i = 0; i < x.length; i++) {
             x[i] = new Array(3);
             for (let j = 0; j < x[i].length; j++) {
-                x[i][j] = "" + i + j;
+                x[i][j] = `${i}${j}`;
             };
         };
         return x;
@@ -42,16 +42,59 @@ const GameBoard = (() => {
     }
 })();
 
-//Player Object factory - name of player, type (human/AI), color, and piece (O or X)
-const Player = (name, piece) => {
 
-    const getName = () => name;
-    let getPiece = () => piece;
+const Player = (playerName, piece) => {
+
+    const getName = () => playerName;
+    //let getPiece = () => piece; IGNORE THIS FOR NOW
 
     return {
         getName,
-        getPiece
+        //getPiece
     };
 }
+
+const gameState = (() => {
+
+    let turn;
+
+    let player1 = Player("Alex");
+    let player2 = Player("Bob");
+    player1 = (player1.getName());
+    player2 = (player2.getName());    
+        
+    const whoStarts = () => {
+
+        let coinFlip = Math.round(Math.random());
+        if (coinFlip == 0) return player1
+        else return player2
+
+    };
+
+    let whoseTurn = () => {
+        if (whoStarts() == player1) {
+            turn = player2
+        }
+        else turn = player1;
+        return turn;
+    }
+
+    let nextTurn = turn => {
+        if (turn == player1) {
+            turn = player2
+        }
+        else if (turn == player2) {
+            turn = player1
+        }
+    }
+
+    return {
+        whoStarts,
+        whoseTurn,
+        nextTurn,
+        Player
+    }
+
+})();
 
 GameBoard.populate();
