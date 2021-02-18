@@ -1,7 +1,9 @@
 .header {
-    display: flex;
-    align-content: flex-end;
-    justify-content: flex-end;
+    display: block;
+    padding: 1em;
+    text-transform: uppercase;
+    letter-spacing: .1em;
+    text-align: center;
 }
 
 .game-view {
