@@ -1,50 +1,57 @@
-//Gameboard object - module
-const Game = (() => {
+//Module to produce the game board array
+const MakeGame = (() => {
 
-    const x = new Array("X","X","X");
-
+    const x = new Array(3);
     const board = () => {
         for (let i = 0; i < x.length; i++) {
-            x[i] = new Array("X","X","X");
+            x[i] = new Array(3);
+            for (let j = 0; j < x[i].length; j++) {
+                x[i][j] = "" + i + j;
+            };
         };
         return x;
     };
     return {
         board
     };
-
 })();
 
-//Player Object factory
-const Player = (name) => {
-    const sayName = () => console.log(`my name is ${name}`)
-    return { sayName };
-}
+//uses the MakeGame module to produce the HTML elements for the gameboard
+const GameBoard = (() => {
 
-
-const populateBoard = (() => {
-
-    const testy = () => {
-        console.log(this)
-    }
-
+    const board = MakeGame.board();
+    console.log(board);
     const _gameBoard = document.querySelector('.board')
-    let _cell = ""; 
+    let _cell;
 
     const populate = () => {
-        for (let i = 0; i < 9; i++) {
-            _cell = document.createElement("div")
-            _cell.setAttribute('class', 'cell'); 
-            _cell.innerHTML="x";
-            _gameBoard.appendChild(_cell);
+
+        for (let x = 0; x < board.length; x++) {
+            for (let y = 0; y < board[x].length; y++) {
+                _cell = document.createElement("div");
+                _cell.setAttribute('class', 'cell');
+                _cell.setAttribute('id', `${board[x][y]}`)
+                _cell.innerHTML = board[x][y];
+                _gameBoard.appendChild(_cell);
+            }
         }
     }
 
     return {
         populate,
-        testy
     }
-
 })();
 
-populateBoard.populate();
+//Player Object factory - name of player, type (human/AI), color, and piece (O or X)
+const Player = (name, piece) => {
+
+    const getName = () => name;
+    let getPiece = () => piece;
+
+    return {
+        getName,
+        getPiece
+    };
+}
+
+GameBoard.populate();
