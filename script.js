@@ -60,41 +60,32 @@ const gameState = (() => {
 
     let player1 = Player("Alex");
     let player2 = Player("Bob");
-    player1 = (player1.getName());
-    player2 = (player2.getName());    
-        
+              
     const whoStarts = () => {
 
         let coinFlip = Math.round(Math.random());
-        if (coinFlip == 0) return player1
-        else return player2
+        if (coinFlip === 0) return turn = player1.getName()
+        else return turn = player2.getName()
+    };    
 
-    };
-
-    let whoseTurn = () => {
-        if (whoStarts() == player1) {
-            turn = player2
+    let nextTurn = (turn) => {
+        if (turn == player1.getName()) {
+            turn = player2.getName()
         }
-        else turn = player1;
-        return turn;
-    }
-
-    let nextTurn = turn => {
-        if (turn == player1) {
-            turn = player2
-        }
-        else if (turn == player2) {
-            turn = player1
+        else if (turn == player2.getName()) {
+            turn = player1.getName()
         }
     }
 
     return {
         whoStarts,
-        whoseTurn,
+        //whoseTurn,
         nextTurn,
         Player
     }
 
 })();
+
+
 
 GameBoard.populate();
