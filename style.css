@@ -15,15 +15,22 @@
 }
 
 .player {    
-    flex: 1 1 8em;
-    background-color: rgb(238, 238, 238);
+    flex: 1 0 10%;
+    background-color: rgb(255, 255, 255);
 }
 
-.player-info {
+.player1-info {
     display: flex;
     flex-direction: row;
     align-items: center;
     justify-content: flex-end;
+}
+
+.player2-info {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: flex-start;
 }
 
 .player1 {
@@ -86,4 +93,8 @@
 .X-selected {
     cursor: auto;
     color: #fff;
+}
+
+h2 {
+    margin: 1px 2px 3px 1px;
 }
