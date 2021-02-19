@@ -55,18 +55,27 @@ const GameBoard = (() => {
 })();
 
 
-const Player = (playerName, piece) => {
+
+const Player = (playerName) => {
 
     const getName = () => playerName;
     const getPiece = () => piece;
 
+    const setPiece = (piece) => {
+        this.piece = piece;
+        return this.piece;
+    }
+
     return {
 
         getName,
-        getPiece
+        getPiece,
+        setPiece
 
     };
 }
+
+
 
 const gameState = (() => {
 
@@ -74,35 +83,61 @@ const gameState = (() => {
 
     let turn;
 
-    let player1 = Player("Alex");
-    let player2 = Player("Bob");
+    let player1 = Player("Player 1");
+    let player2 = Player("Player 2");
     let p1name = player1.getName()
     let p2name = player2.getName()
-              
+    let p1piece;
+    let p2piece;
+
+    const randomPiece = () => {
+
+        let coinFlip = Math.round(Math.random());
+        if (coinFlip === 0) {
+            p1piece = player1.setPiece("X");
+            p2piece = player2.setPiece("O");
+            return;
+        } else {
+            p1piece = player1.setPiece("O");
+            p2piece = player2.setPiece("X");
+            return;
+        }
+    }
+
+    const checkPiece = () => {
+        return console.log(`${p1name}: ${p1piece}, ${p2name}: ${p2piece}`);
+    }
+
     const whoStarts = () => {
 
         let coinFlip = Math.round(Math.random());
         if (coinFlip === 0) return turn = p1name
         else return turn = p2name;
 
-    };    
+    };
 
-    let nextTurn = () => {
+    const nextTurn = () => {
 
         if (turn == p1name) {
-            turn = p2name            
+            turn = p2name
+            return turn = p2name;
         }
         else if (turn == p2name) {
-            turn = p1name            
+            turn = p1name
+            return turn = p1name;
         }
 
     }
 
+
+
     return {
 
-        whoStarts,        
+        whoStarts,
         nextTurn,
-        Player
+        Player,
+        randomPiece,
+        checkPiece
 
     }
 
