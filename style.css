@@ -14,9 +14,16 @@
     justify-content: center;    
 }
 
-.player {
+.player {    
     flex: 1 1 8em;
     background-color: rgb(238, 238, 238);
+}
+
+.player-info {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: flex-end;
 }
 
 .player1 {
