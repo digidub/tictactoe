@@ -58,10 +58,11 @@ const GameBoard = (() => {
 
 const Player = (playerName) => {
 
+
     const getName = () => playerName;
     const getPiece = () => piece;
 
-    const setPiece = (piece) => {
+    function setPiece(piece) {
         this.piece = piece;
         return this.piece;
     }
@@ -87,8 +88,10 @@ const gameState = (() => {
     let player2 = Player("Player 2");
     let p1name = player1.getName()
     let p2name = player2.getName()
-    let p1piece;
-    let p2piece;
+    let p1piece, p2piece;
+
+    const board = document.querySelector(".board");
+
 
     const randomPiece = () => {
 
@@ -129,7 +132,21 @@ const gameState = (() => {
 
     }
 
-
+    board.onclick = function (e) {
+        console.log(e)
+        if (e.target.className == "cell") {
+            //let populate = e.target.className
+            e.target.innerHTML = "X";
+        }
+        else return;
+    
+        if (turn = p1name) {
+    
+        }
+        else {
+    
+        }
+    }
 
     return {
 
@@ -137,7 +154,7 @@ const gameState = (() => {
         nextTurn,
         Player,
         randomPiece,
-        checkPiece
+        checkPiece,
 
     }
 
