@@ -4,19 +4,12 @@ const MakeGame = (() => {
     const x = new Array(3);
 
     const board = () => {
-
         for (let i = 0; i < x.length; i++) {
-
             x[i] = new Array(3);
-
             for (let j = 0; j < x[i].length; j++) {
-
                 x[i][j] = `${i}${j}`;
-
             };
-
         };
-
         return x;
     };
 
@@ -57,7 +50,6 @@ const GameBoard = (() => {
 
 
 const Player = (playerName) => {
-
 
     const getName = () => playerName;
     const getPiece = () => piece;
@@ -133,19 +125,17 @@ const gameState = (() => {
     }
 
     board.onclick = function (e) {
-        console.log(e)
+
         if (e.target.className == "cell") {
-            //let populate = e.target.className
-            e.target.innerHTML = "X";
+            if (turn == p1name) {
+                e.target.innerHTML = p1piece;
+                nextTurn()
+            } else {
+                e.target.innerHTML = p2piece;
+                nextTurn()
+            };
         }
-        else return;
-    
-        if (turn = p1name) {
-    
-        }
-        else {
-    
-        }
+        else return;        
     }
 
     return {
