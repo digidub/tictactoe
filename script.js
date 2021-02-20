@@ -35,7 +35,7 @@ const GameBoard = (() => {
                 _cell = document.createElement("div");
                 _cell.setAttribute('class', 'cell');
                 _cell.setAttribute('id', `${board[x][y]}`)
-                _cell.innerHTML = board[x][y];
+                //_cell.innerHTML = board[x][y];
                 _gameBoard.appendChild(_cell);
 
             }
@@ -84,7 +84,6 @@ const gameState = (() => {
 
     const board = document.querySelector(".board");
 
-
     const randomPiece = () => {
 
         let coinFlip = Math.round(Math.random());
@@ -97,10 +96,6 @@ const gameState = (() => {
             p2piece = player2.setPiece("X");
             return;
         }
-    }
-
-    const checkPiece = () => {
-        return console.log(`${p1name}: ${p1piece}, ${p2name}: ${p2piece}`);
     }
 
     const whoStarts = () => {
@@ -128,25 +123,31 @@ const gameState = (() => {
 
         if (e.target.className == "cell") {
             if (turn == p1name) {
-                e.target.innerHTML = p1piece;
-                nextTurn()
+                if (!e.target.innerHTML) {
+                    e.target.innerHTML = p1piece;
+                    nextTurn()
+                } else return;
             } else {
-                e.target.innerHTML = p2piece;
-                nextTurn()
+                if (!e.target.innerHTML) {
+                    e.target.innerHTML = p2piece;
+                    nextTurn()
+                } else return;
             };
         }
-        else return;        
+        else return;
     }
+
+    randomPiece();
+    whoStarts();
 
     return {
-
-        whoStarts,
+        
         nextTurn,
         Player,
-        randomPiece,
-        checkPiece,
 
     }
+
+
 
 })();
 
