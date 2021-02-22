@@ -151,31 +151,36 @@ const gameState = (() => {
     }
 
     function winCondition() {
-        if (diagUp() || diagDown() || allXequal(MakeGame.board) || allYequal()) {
+        if (diagUp() || diagDown() || allXequal() || allYequal()) {
             console.log(`${turn} wins!`)
             return;
         }
         else return;
     };
 
-    const diagUp = function () {
-        return ((MakeGame.board[0][0] == MakeGame.board[1][1]) && (MakeGame.board[0][0] == MakeGame.board[2][2]))
-    }
+    const diagUp = () => ((MakeGame.board[0][0] === MakeGame.board[1][1]) && (MakeGame.board[0][0] === MakeGame.board[2][2]))
 
-    const diagDown = function () {
-        return ((MakeGame.board[0][2] == MakeGame.board[1][1]) && (MakeGame.board[0][2] == MakeGame.board[2][0]))
-    }
+    const diagDown = () => ((MakeGame.board[0][2] === MakeGame.board[1][1]) && (MakeGame.board[0][2] === MakeGame.board[2][0]))
 
-    const allXequal = array => array.every(value => value === array[0]);
+    const allXequal = function () {
+        for (i = 0; i < MakeGame.board.length; i++) {
+            if (xCheck(MakeGame.board[i])) {
+                return true;
+            }
+        }
+        return false;
+    }
 
     const allYequal = function () {
         for (i = 0; i < MakeGame.board[0].length; i++) {
-            if (MakeGame.board[0][i] == MakeGame.board[1][i] && MakeGame.board[0][i] == MakeGame.board[2][j]) {
+            if ((MakeGame.board[0][i] === MakeGame.board[1][i]) && (MakeGame.board[0][i] === MakeGame.board[2][i])) {
                 return true;
             }
-            else return false;
         }
+        return false;
     }
+
+    const xCheck = arr => arr.every(val => val === arr[0]);
 
     randomPiece();
     whoStarts();
@@ -191,11 +196,3 @@ const gameState = (() => {
 
 
 })();
-
-
-
-let myarr = [1, 1, 1]
-
-const allEqual = arr => arr.every(val => val === arr[0]);
-const result = allEqual(myarr);
-
