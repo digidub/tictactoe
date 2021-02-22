@@ -131,7 +131,8 @@ const gameState = (() => {
                     splitValueY = gameArrayIndex[1];
                     MakeGame.board[splitValueX][splitValueY] = p1piece;
                     e.target.innerHTML = p1piece;
-                    nextTurn()
+                    nextTurn();
+                    if (winCondition() == true) { console.log("woo") };
                 } else return;
             } else {
                 if (!e.target.innerHTML) {
@@ -141,7 +142,8 @@ const gameState = (() => {
                     splitValueY = gameArrayIndex[1];
                     MakeGame.board[splitValueX][splitValueY] = p2piece;
                     e.target.innerHTML = p2piece;
-                    nextTurn()
+                    nextTurn();
+                    winCondition();
                 } else return;
             };
         }
@@ -149,12 +151,31 @@ const gameState = (() => {
     }
 
     function winCondition() {
-        let win = MakeGame.board.every((elem, index, arr) => {
-            
+        if (diagUp() || diagDown() || allXequal(MakeGame.board) || allYequal()) {
+            console.log(`${turn} wins!`)
+            return;
         }
-        )
+        else return;
     };
 
+    const diagUp = function () {
+        return ((MakeGame.board[0][0] == MakeGame.board[1][1]) && (MakeGame.board[0][0] == MakeGame.board[2][2]))
+    }
+
+    const diagDown = function () {
+        return ((MakeGame.board[0][2] == MakeGame.board[1][1]) && (MakeGame.board[0][2] == MakeGame.board[2][0]))
+    }
+
+    const allXequal = array => array.every(value => value === array[0]);
+
+    const allYequal = function () {
+        for (i = 0; i < MakeGame.board[0].length; i++) {
+            if (MakeGame.board[0][i] == MakeGame.board[1][i] && MakeGame.board[0][i] == MakeGame.board[2][j]) {
+                return true;
+            }
+            else return false;
+        }
+    }
 
     randomPiece();
     whoStarts();
@@ -163,7 +184,7 @@ const gameState = (() => {
 
         nextTurn,
         Player,
-        winCondition
+        winCondition,
 
     }
 
@@ -172,4 +193,9 @@ const gameState = (() => {
 })();
 
 
+
+let myarr = [1, 1, 1]
+
+const allEqual = arr => arr.every(val => val === arr[0]);
+const result = allEqual(myarr);
 
