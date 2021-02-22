@@ -76,6 +76,7 @@ const gameState = (() => {
     GameBoard.populate();
 
     let turn;
+    let tally = 0
 
     let player1 = Player("Player 1");
     let player2 = Player("Player 2");
@@ -107,14 +108,16 @@ const gameState = (() => {
 
     };
 
-    const nextTurn = () => {
+    const nextTurn = () => {        
 
         if (turn == p1name) {
             turn = p2name
+            tally++
             return turn = p2name;
         }
         else if (turn == p2name) {
             turn = p1name
+            tally++
             return turn = p1name;
         }
 
@@ -143,7 +146,7 @@ const gameState = (() => {
                     MakeGame.board[splitValueX][splitValueY] = p2piece;
                     e.target.innerHTML = p2piece;
                     nextTurn();
-                    winCondition();
+                    if (tally > 3) winCondition();
                 } else return;
             };
         }
@@ -155,7 +158,11 @@ const gameState = (() => {
             console.log(`${turn} wins!`)
             return;
         }
-        else return;
+        else if (tally > 7) {
+            console.log(`draw`)
+            return;
+        }
+        return;
     };
 
     const diagUp = () => ((MakeGame.board[0][0] === MakeGame.board[1][1]) && (MakeGame.board[0][0] === MakeGame.board[2][2]))
