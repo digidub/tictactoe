@@ -1,21 +1,22 @@
 //Module to produce the game board array
 const MakeGame = (() => {
 
-    const x = new Array(3);
+    const board = new Array(3);
 
-    const board = () => {
-        for (let i = 0; i < x.length; i++) {
-            x[i] = new Array(3);
-            for (let j = 0; j < x[i].length; j++) {
-                x[i][j] = `${i}${j}`;
+    const boardFunc = () => {
+        for (let i = 0; i < board.length; i++) {
+            board[i] = new Array(3);
+            for (let j = 0; j < board[i].length; j++) {
+                board[i][j] = `${i}${j}`;
             };
         };
-        return x;
+        return board;
     };
 
     return {
 
-        board
+        board,
+        boardFunc
 
     };
 })();
@@ -23,7 +24,7 @@ const MakeGame = (() => {
 //uses the MakeGame module to produce the HTML elements for the gameboard
 const GameBoard = (() => {
 
-    const board = MakeGame.board();
+    const board = MakeGame.boardFunc();
     const _gameBoard = document.querySelector('.board')
     let _cell;
 
@@ -124,11 +125,21 @@ const gameState = (() => {
         if (e.target.className == "cell") {
             if (turn == p1name) {
                 if (!e.target.innerHTML) {
+                    gameArrayIndex = e.target.attributes.id.value;
+                    splitIndexValue = gameArrayIndex.split("");
+                    splitValueX = gameArrayIndex[0];
+                    splitValueY = gameArrayIndex[1];
+                    MakeGame.board[splitValueX][splitValueY] = p1piece;
                     e.target.innerHTML = p1piece;
                     nextTurn()
                 } else return;
             } else {
                 if (!e.target.innerHTML) {
+                    gameArrayIndex = e.target.attributes.id.value;
+                    splitIndexValue = gameArrayIndex.split("");
+                    splitValueX = gameArrayIndex[0];
+                    splitValueY = gameArrayIndex[1];
+                    MakeGame.board[splitValueX][splitValueY] = p2piece;
                     e.target.innerHTML = p2piece;
                     nextTurn()
                 } else return;
@@ -137,13 +148,22 @@ const gameState = (() => {
         else return;
     }
 
+    function winCondition() {
+        let win = MakeGame.board.every((elem, index, arr) => {
+            
+        }
+        )
+    };
+
+
     randomPiece();
     whoStarts();
 
     return {
-        
+
         nextTurn,
         Player,
+        winCondition
 
     }
 
