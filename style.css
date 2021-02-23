@@ -14,9 +14,41 @@
     justify-content: center;    
 }
 
-.player {    
+.player-hidden {    
     flex: 1 0 10%;
     background-color: rgb(255, 255, 255);
+    opacity: 0;
+}
+
+.player-shown {    
+    flex: 1 0 10%;
+    background-color: rgb(255, 255, 255);
+    opacity: 100;
+    transition: opacity 0.7s ease-out;
+}
+
+.new-game-form-shown {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    align-content: space-between;
+    opacity: 100;
+}
+
+.new-game-form-hidden {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    align-content: space-between;
+    opacity: 0;
+    transition: opacity 0.1s;
+}
+
+.player-fields {
+    display: flex;
+    flex-direction: row;    
 }
 
 .player1-info {
@@ -37,6 +69,10 @@
     text-align: right;
 }
 
+.splash {
+    display: flex
+}
+
 .board {
     display: flex;
     flex-flow: row wrap;    
@@ -46,7 +82,16 @@
     flex: 1 1 30em;
 }
 
-.cell {
+.grid {
+    display: flex;
+    flex-flow: row wrap;    
+    height: 500px;
+    justify-content: space-around;
+    flex-basis: auto;
+    flex: 1 1 30em;
+}
+
+.cell-shown {
     cursor: pointer;
     background: #e8e8e8;
     display: flex;
@@ -55,6 +100,21 @@
     text-align: center;
     width: 30%;
     height: 30%;
+    opacity: 100;
+    transition: opacity 0.8s ease-out;
+}
+
+.cell-hidden {
+    cursor: pointer;
+    background: #e8e8e8;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    width: 30%;
+    height: 30%;
+    opacity: 0;
+    transition: opacity 0.8s ease-out;
 }
 
 #piece-toggle {
