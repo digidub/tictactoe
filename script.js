@@ -30,17 +30,13 @@ const GameBoard = (() => {
 
     const populate = () => {
 
-        let _grid = document.createElement("div");
-        _grid.setAttribute('class', 'grid');
-        _gameBoard.appendChild(_grid)
-
         for (let x = 0; x < board.length; x++) {
 
             for (let y = 0; y < board[x].length; y++) {
                 _cell = document.createElement("div");
                 _cell.setAttribute('class', 'cell-hidden');
                 _cell.setAttribute('id', `${board[x][y]}`)
-                _grid.appendChild(_cell);
+                _gameBoard.appendChild(_cell);
             }
         }
 
@@ -130,7 +126,7 @@ const gameState = (() => {
         setTimeout(showBoard, 1);
     }
 
-        startButton.onclick = function () {
+    startButton.onclick = function () {
         let p1text = document.querySelector(`[name="player1-name"]`).value;
         let p2text = document.querySelector(`[name="player2-name"]`).value;
         if (p1text != "") {
@@ -161,12 +157,21 @@ const gameState = (() => {
         if (coinFlip === 0) {
             p1piece = player1.setPiece("X");
             p2piece = player2.setPiece("O");
+            displayPlayerPiece(p1piece, p2piece);
             return;
         } else {
             p1piece = player1.setPiece("O");
             p2piece = player2.setPiece("X");
+            displayPlayerPiece(p1piece, p2piece);
             return;
         }
+    }
+
+    const displayPlayerPiece = (p1, p2) => {
+        const p1pieceDiv = document.querySelector(".player1-piece")
+        const p2pieceDiv = document.querySelector(".player2-piece")
+        p1pieceDiv.innerHTML = `<button class="${p1}" role="radio" type="button">${p1}</button>`
+        p2pieceDiv.innerHTML = `<button class="${p2}" role="radio" type="button">${p2}</button>`
     }
 
     const whoStarts = () => {
@@ -203,8 +208,10 @@ const gameState = (() => {
                     splitValueY = gameArrayIndex[1];
                     MakeGame.board[splitValueX][splitValueY] = p1piece;
                     e.target.innerHTML = p1piece;
+                    if (turnTally > 3) {
+                        winCondition();
+                    }
                     nextTurn();
-                    if (winCondition() == true) { console.log("woo") };
                 } else return;
             } else {
                 if (!e.target.innerHTML) {
@@ -214,8 +221,10 @@ const gameState = (() => {
                     splitValueY = gameArrayIndex[1];
                     MakeGame.board[splitValueX][splitValueY] = p2piece;
                     e.target.innerHTML = p2piece;
+                    if (turnTally > 3) {
+                        winCondition();
+                    }
                     nextTurn();
-                    if (turnTally > 3) winCondition();
                 } else return;
             };
         }
@@ -272,3 +281,6 @@ const gameState = (() => {
 
 
 })();
+
+p1pieceDiv = document.querySelector(".player1-piece")
+console.log(p1pieceDiv)

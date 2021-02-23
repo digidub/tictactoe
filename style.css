@@ -117,7 +117,7 @@
     transition: opacity 0.8s ease-out;
 }
 
-#piece-toggle {
+.piece-toggle {
     text-align: right;
     margin: .0em 0;
     display: flex;
@@ -125,34 +125,25 @@
     align-items: center;
 }
 
-#piece-toggle button {
+button {
     padding: 5px;
     border: 1px solid #ddd;
     border-radius: 5px;
-    background: 1px solid #eee;
+    background: rgb(255, 255, 255);
     cursor: pointer;
     margin: 0em;
 }
 
-#piece-toggle button.X {
-    border-radius: 0 5px 5px 0;
+button.X {
+    font-weight: bold;
+    border-radius: 5px;
     color: #ec79ec;
 }
 
-#piece-toggle button.O {
-    border-right: none;
-    border-radius: 5px 0 0 5px;
+button.O {
+    font-weight: bold;
+    border-radius: 5px;
     color: #96ec79;
-}
-
-.O-selected {
-    cursor: auto;
-    color: #fff;
-}
-
-.X-selected {
-    cursor: auto;
-    color: #fff;
 }
 
 h2 {
