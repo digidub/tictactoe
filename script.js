@@ -194,42 +194,46 @@ const gameState = (() => {
             turnTally++
             return turn = p1name;
         }
-
     }
 
-    board.onclick = function (e) {
-
-        if (e.target.className == "cell-shown") {
-            if (turn == p1name) {
-                if (!e.target.innerHTML) {
-                    gameArrayIndex = e.target.attributes.id.value;
-                    splitIndexValue = gameArrayIndex.split("");
-                    splitValueX = gameArrayIndex[0];
-                    splitValueY = gameArrayIndex[1];
-                    MakeGame.board[splitValueX][splitValueY] = p1piece;
-                    e.target.innerHTML = p1piece;
-                    if (turnTally > 3) {
-                        winCondition();
-                    }
-                    nextTurn();
-                } else return;
-            } else {
-                if (!e.target.innerHTML) {
-                    gameArrayIndex = e.target.attributes.id.value;
-                    splitIndexValue = gameArrayIndex.split("");
-                    splitValueX = gameArrayIndex[0];
-                    splitValueY = gameArrayIndex[1];
-                    MakeGame.board[splitValueX][splitValueY] = p2piece;
-                    e.target.innerHTML = p2piece;
-                    if (turnTally > 3) {
-                        winCondition();
-                    }
-                    nextTurn();
-                } else return;
-            };
+    board.onmouseover = function (e) {
+        if (e.target.className == "cell-shown") {            
+            e.target.classList.add('cell-hover')
         }
         else return;
     }
+    
+    board.onmouseout = function (e) {
+        e.target.classList.remove('cell-hover')
+        return;
+    };
+
+    board.onclick = function (e) {
+        if (e.target.className == "cell-shown cell-hover") {
+            if (!e.target.innerHTML) {
+                if (turn == p1name) {
+                    fillCell(e, p1piece);
+                }
+                else fillCell(e, p2piece)
+            }
+        }
+        else return;
+    }
+
+    function fillCell(e, piece) {
+        gameArrayIndex = e.target.attributes.id.value;
+        splitIndexValue = gameArrayIndex.split("");
+        splitValueX = gameArrayIndex[0];
+        splitValueY = gameArrayIndex[1];
+        MakeGame.board[splitValueX][splitValueY] = piece;
+        e.target.innerHTML = piece;
+        if (turnTally > 3) {
+            winCondition();
+        }
+        nextTurn();
+    }
+
+
 
     function winCondition() {
         if (diagUpEqual() || diagDownEqual() || rowEqual() || columnEqual()) {
@@ -281,6 +285,3 @@ const gameState = (() => {
 
 
 })();
-
-p1pieceDiv = document.querySelector(".player1-piece")
-console.log(p1pieceDiv)

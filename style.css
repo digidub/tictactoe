@@ -104,15 +104,20 @@
     transition: opacity 0.8s ease-out;
 }
 
-.cell-hidden {
+.cell-hover {
     cursor: pointer;
-    background: #e8e8e8;
+    background: #dadada;
     display: flex;
     justify-content: center;
     align-items: center;
     text-align: center;
     width: 30%;
     height: 30%;
+    opacity: 100;
+    transition: opacity 0.8s ease-out;
+}
+
+.cell-hidden {       
     opacity: 0;
     transition: opacity 0.8s ease-out;
 }
