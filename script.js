@@ -280,14 +280,12 @@ const gameState = (() => {
     function winCondition() {
         if (diagUpEqual() || diagDownEqual() || rowEqual() || columnEqual()) {
             if (turn == p1name) {
-                console.log(`${p1name} wins`)
                 player1.addPoint();
                 updateScore('player1', player1.getScore());
                 turnTally = 0;
                 GameBoard.populate();
             }
             else {
-                console.log(`${p2name} wins`)
                 player2.addPoint();
                 updateScore('player2', player2.getScore())
                 turnTally = 0;
@@ -297,7 +295,6 @@ const gameState = (() => {
             return;
         }
         else if (turnTally > 7) {
-            console.log(`draw`)
             GameBoard.populate();
             turnTally = 0;
             return;
@@ -346,18 +343,6 @@ const gameState = (() => {
             p1board.classList.add("inactive")
         }
     }
-
-
-
-    return {
-
-        nextTurn,
-        Player,
-        winCondition,
-
-    }
-
-
 
 })();
 
