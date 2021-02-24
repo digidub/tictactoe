@@ -22,7 +22,7 @@ const MakeGame = (() => {
     };
 })();
 
-//uses the MakeGame module to produce the HTML elements for the gameboard
+//uses the MakeGame module to produce the HTML elements using the game board array
 const GameBoard = (() => {
 
     let _cell;
@@ -61,16 +61,17 @@ const GameBoard = (() => {
 })();
 
 
-
+//Player object used for storing and retreiving player's name, piece, score
 const Player = (playerName) => {
 
     let score = 0;
 
-    const getName = () => playerName;
+    const getName = () => playerName;    
+    const getScore = () => score;
+
     function getPiece() {
         return this.piece;
     } 
-    const getScore = () => score;
 
     function setPiece(piece) {
         this.piece = piece;
@@ -100,7 +101,7 @@ const Player = (playerName) => {
 }
 
 
-
+//controls the state of the game, including: whose turn, total turns so far, how turns are displayed, the display of the board, checking to see if a player has won, and resetting the board.
 const gameState = (() => {
 
     let turn;
