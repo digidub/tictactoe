@@ -66,8 +66,8 @@
 }
 
 .inactive {
-    opacity: 20%;
-}
+    opacity: 50%;
+}   
 
 .player1 {
     text-align: right;
@@ -108,9 +108,22 @@
     transition: opacity 0.8s ease-out;
 }
 
-.cell-hover {
+.cell-hover-green {
     cursor: pointer;
-    background: #dadada;
+    background: #c2ebb5;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    width: 30%;
+    height: 30%;
+    opacity: 100;
+    transition: opacity 0.8s ease-out;
+}
+
+.cell-hover-pink {
+    cursor: pointer;
+    background: #e7bde7;
     display: flex;
     justify-content: center;
     align-items: center;

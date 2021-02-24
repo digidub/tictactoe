@@ -34,11 +34,11 @@ const GameBoard = (() => {
         if (board == "") {
             board = MakeGame.boardFunc();
             _gameBoard = document.querySelector('.board')
-            populateLoop("cell-hidden");            
+            populateLoop("cell-hidden");
         }
         else {
-            _gameBoard.innerHTML="";
-            board = MakeGame.boardFunc();            
+            _gameBoard.innerHTML = "";
+            board = MakeGame.boardFunc();
             populateLoop("cell-shown");
         }
     }
@@ -67,7 +67,9 @@ const Player = (playerName) => {
     let score = 0;
 
     const getName = () => playerName;
-    const getPiece = () => piece;
+    function getPiece() {
+        return this.piece;
+    } 
     const getScore = () => score;
 
     function setPiece(piece) {
@@ -104,7 +106,6 @@ const gameState = (() => {
     let turn;
     let turnTally = 0
     let p1name, p2name, p1piece, p2piece;
-    let p1score = 0, p2score = 0;
 
     const p1nameDisplay = document.querySelector(".player1-name");
     const p2nameDisplay = document.querySelector(".player2-name");
@@ -229,18 +230,29 @@ const gameState = (() => {
 
     board.onmouseover = function (e) {
         if (e.target.className == "cell-shown") {
-            e.target.classList.add('cell-hover')
+
+            if (turn == p1name) {
+                if (player1.getPiece() == "X") {
+                    e.target.classList.add('cell-hover-pink')
+                } else e.target.classList.add('cell-hover-green')
+            }
+            else if (turn == p2name) {
+                if (player2.getPiece() == "X") {
+                    e.target.classList.add('cell-hover-pink')
+                } else e.target.classList.add('cell-hover-green')
+            }
         }
         else return;
     }
 
     board.onmouseout = function (e) {
-        e.target.classList.remove('cell-hover')
+        e.target.classList.remove('cell-hover-pink');
+        e.target.classList.remove('cell-hover-green')
         return;
     };
 
     board.onclick = function (e) {
-        if (e.target.className == "cell-shown cell-hover") {
+        if ((e.target.className == "cell-shown cell-hover-pink") || (e.target.className == "cell-shown cell-hover-green")) {
             if (!e.target.innerHTML) {
                 if (turn == p1name) {
                     placePiece(e, p1piece);
@@ -260,7 +272,7 @@ const gameState = (() => {
         e.target.innerHTML = piece;
         if (turnTally > 3) {
             winCondition();
-            
+
         }
         nextTurn();
     }
