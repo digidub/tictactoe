@@ -175,6 +175,7 @@ const gameState = (() => {
         showScoreBoard();
         randomPiece();
         whoStarts();
+        activeTurn();
         return;
     }
 
@@ -215,13 +216,15 @@ const gameState = (() => {
         if (turn == p1name) {
             turn = p2name
             turnTally++
-            return turn = p2name;
+            turn = p2name;
         }
         else if (turn == p2name) {
             turn = p1name
             turnTally++
-            return turn = p1name;
+            turn = p1name;
         }
+        activeTurn();
+        return turn;
     }
 
     board.onmouseover = function (e) {
@@ -320,6 +323,18 @@ const gameState = (() => {
         return;
     }
 
+    const activeTurn = () => {
+        const p1board = document.querySelector(".player1")
+        const p2board = document.querySelector(".player2")
+        if (turn == p1name) {
+            p1board.classList.remove("inactive")
+            p2board.classList.add("inactive")
+        } else {
+            p2board.classList.remove("inactive")
+            p1board.classList.add("inactive")
+        }
+    }
+
 
 
     return {
@@ -333,3 +348,4 @@ const gameState = (() => {
 
 
 })();
+
