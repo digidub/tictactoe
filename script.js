@@ -336,8 +336,8 @@ const gameState = (() => {
     }
 
     const activeTurn = () => {
-        const p1board = document.querySelector(".player1")
-        const p2board = document.querySelector(".player2")
+        const p1board = document.querySelector(".player1-info")
+        const p2board = document.querySelector(".player2-info")
         if (turn == p1name) {
             p1board.classList.remove("inactive")
             p2board.classList.add("inactive")
