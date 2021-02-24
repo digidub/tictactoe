@@ -49,11 +49,13 @@ const GameBoard = (() => {
             for (let y = 0; y < board[x].length; y++) {
                 _cell = document.createElement("div");
                 _cell.setAttribute('class', `${gameState}`);
-                _cell.setAttribute('id', `${board[x][y]}`)
+                _cell.setAttribute('id', `${board[x][y]}`);
                 _gameBoard.appendChild(_cell);
             }
         }
     }
+
+
 
     return {
         populate,
@@ -66,12 +68,12 @@ const Player = (playerName) => {
 
     let score = 0;
 
-    const getName = () => playerName;    
+    const getName = () => playerName;
     const getScore = () => score;
 
     function getPiece() {
         return this.piece;
-    } 
+    }
 
     function setPiece(piece) {
         this.piece = piece;
@@ -88,6 +90,20 @@ const Player = (playerName) => {
         return score;
     }
 
+    function emptySpace() {
+        const freeSpaceArray = [];
+        for (i = 0; i < MakeGame.board.length; i++) {
+            for (j = 0; j < MakeGame.board[i].length; j++) {
+                if ((MakeGame.board[i][j] != "X") && (MakeGame.board[i][j] != "O")) {
+                    freeSpaceArray.push(MakeGame.board[i][j]);
+                    console.log(freeSpaceArray);
+                }
+            }
+        }
+        return freeSpaceArray;
+    }
+
+
     return {
 
         setName,
@@ -96,6 +112,7 @@ const Player = (playerName) => {
         getPiece,
         getScore,
         addPoint,
+        emptySpace
 
     };
 }
