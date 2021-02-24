@@ -1,16 +1,17 @@
 //Module to produce the game board array
 const MakeGame = (() => {
 
-    const board = new Array(3);
+    let board = [];
 
-    const boardFunc = () => {
+    function boardFunc() {
+        board = new Array(3);
         for (let i = 0; i < board.length; i++) {
             board[i] = new Array(3);
             for (let j = 0; j < board[i].length; j++) {
                 board[i][j] = `${i}${j}`;
             };
         };
-        return board;
+        return this.board = board;
     };
 
     return {
@@ -24,22 +25,34 @@ const MakeGame = (() => {
 //uses the MakeGame module to produce the HTML elements for the gameboard
 const GameBoard = (() => {
 
-    const board = MakeGame.boardFunc();
-    const _gameBoard = document.querySelector('.board')
     let _cell;
+    let board = "";
+    let _gameBoard;
 
     const populate = () => {
 
+        if (board == "") {
+            board = MakeGame.boardFunc();
+            _gameBoard = document.querySelector('.board')
+            populateLoop("cell-hidden");            
+        }
+        else {
+            _gameBoard.innerHTML="";
+            board = MakeGame.boardFunc();            
+            populateLoop("cell-shown");
+        }
+    }
+
+    const populateLoop = (gameState) => {
         for (let x = 0; x < board.length; x++) {
 
             for (let y = 0; y < board[x].length; y++) {
                 _cell = document.createElement("div");
-                _cell.setAttribute('class', 'cell-hidden');
+                _cell.setAttribute('class', `${gameState}`);
                 _cell.setAttribute('id', `${board[x][y]}`)
                 _gameBoard.appendChild(_cell);
             }
         }
-
     }
 
     return {
@@ -47,10 +60,15 @@ const GameBoard = (() => {
     }
 })();
 
+
+
 const Player = (playerName) => {
+
+    let score = 0;
 
     const getName = () => playerName;
     const getPiece = () => piece;
+    const getScore = () => score;
 
     function setPiece(piece) {
         this.piece = piece;
@@ -62,21 +80,31 @@ const Player = (playerName) => {
         return this.name;
     }
 
+    function addPoint() {
+        score++
+        return score;
+    }
+
     return {
 
         setName,
         setPiece,
         getName,
-        getPiece
+        getPiece,
+        getScore,
+        addPoint,
 
     };
 }
+
+
 
 const gameState = (() => {
 
     let turn;
     let turnTally = 0
     let p1name, p2name, p1piece, p2piece;
+    let p1score = 0, p2score = 0;
 
     const p1nameDisplay = document.querySelector(".player1-name");
     const p2nameDisplay = document.querySelector(".player2-name");
@@ -197,12 +225,12 @@ const gameState = (() => {
     }
 
     board.onmouseover = function (e) {
-        if (e.target.className == "cell-shown") {            
+        if (e.target.className == "cell-shown") {
             e.target.classList.add('cell-hover')
         }
         else return;
     }
-    
+
     board.onmouseout = function (e) {
         e.target.classList.remove('cell-hover')
         return;
@@ -212,15 +240,15 @@ const gameState = (() => {
         if (e.target.className == "cell-shown cell-hover") {
             if (!e.target.innerHTML) {
                 if (turn == p1name) {
-                    fillCell(e, p1piece);
+                    placePiece(e, p1piece);
                 }
-                else fillCell(e, p2piece)
+                else placePiece(e, p2piece)
             }
         }
         else return;
     }
 
-    function fillCell(e, piece) {
+    function placePiece(e, piece) {
         gameArrayIndex = e.target.attributes.id.value;
         splitIndexValue = gameArrayIndex.split("");
         splitValueX = gameArrayIndex[0];
@@ -229,19 +257,34 @@ const gameState = (() => {
         e.target.innerHTML = piece;
         if (turnTally > 3) {
             winCondition();
+            
         }
         nextTurn();
     }
 
-
-
     function winCondition() {
         if (diagUpEqual() || diagDownEqual() || rowEqual() || columnEqual()) {
-            console.log(`${turn} wins!`)
+            if (turn == p1name) {
+                console.log(`${p1name} wins`)
+                player1.addPoint();
+                updateScore('player1', player1.getScore());
+                turnTally = 0;
+                GameBoard.populate();
+            }
+            else {
+                console.log(`${p2name} wins`)
+                player2.addPoint();
+                updateScore('player2', player2.getScore())
+                turnTally = 0;
+                GameBoard.populate();
+            }
+
             return;
         }
         else if (turnTally > 7) {
             console.log(`draw`)
+            GameBoard.populate();
+            turnTally = 0;
             return;
         }
         return;
@@ -271,8 +314,13 @@ const gameState = (() => {
 
     const xCheck = arr => arr.every(val => val === arr[0]);
 
-    //randomPiece();
-    //whoStarts();
+    const updateScore = (player, score) => {
+        const scoreDiv = document.querySelector(`.${player}-score`)
+        scoreDiv.innerText = score;
+        return;
+    }
+
+
 
     return {
 
