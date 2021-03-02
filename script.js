@@ -17,6 +17,7 @@ const GameBoard = (() => {
     function resetArr() {
         this.arr = [];
         this.arr = buildArr();
+        return this.arr = arr;
     };
 
     return {
@@ -188,6 +189,8 @@ const gameState = (() => {
         };
         p1name = player1.getName();
         p2name = player2.getName();
+        player1.num = "player1";
+        player2.num = "player2";
         p1nameDisplay.innerHTML = `<h2>${player1.getName()}</h2>`
         p2nameDisplay.innerHTML = `<h2>${player2.getName()}</h2>`
         hideStartScreen();
@@ -295,103 +298,31 @@ const gameState = (() => {
         nextTurn();
     }
 
-    function winCondition() {
-        if (diagUpEqual() || diagDownEqual() || rowEqual() || columnEqual()) {
-            if (turn == p1name) {
-                player1.addPoint();
-                updateScore('player1', player1.getScore());
-                turnTally = 0;
-                GameDOM.populate();
-            }
-            else {
-                player2.addPoint();
-                updateScore('player2', player2.getScore())
-                turnTally = 0;
-                GameDOM.populate();
-            }
+    function winnerFound(player) {
+        player.addPoint()
+        updateScore(player.num, player.getScore());
+        turnTally = 0;
+        GameDOM.populate();
+    }
 
-            return;
+    function winCondition() {
+        if (turn == p1name) {
+            if (checkWinner(GameBoard.arr, p1piece)) {
+                winnerFound(player1)
+            }
         }
-        else if (turnTally > 7) {
+        else if (turn == p2name) {
+            if (checkWinner(GameBoard.arr, p2piece)) {
+                winnerFound(player2)
+            }
+        }
+        else if (turnTally > 7) { //evaluates draw
             GameDOM.populate();
             turnTally = 0;
             return;
         }
-        return;
     };
 
-    const diagUpEqual = () => ((GameBoard.arr[0][0] === GameBoard.arr[1][1]) && (GameBoard.arr[0][0] === GameBoard.arr[2][2]))
-
-    const diagDownEqual = () => ((GameBoard.arr[0][2] === GameBoard.arr[1][1]) && (GameBoard.arr[0][2] === GameBoard.arr[2][0]))
-
-    const rowEqual = function () {
-        for (i = 0; i < GameBoard.arr.length; i++) {
-            if (xCheck(GameBoard.arr[i])) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    const columnEqual = function () {
-        for (i = 0; i < GameBoard.arr[0].length; i++) {
-            if ((GameBoard.arr[0][i] === GameBoard.arr[1][i]) && (GameBoard.arr[0][i] === GameBoard.arr[2][i])) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    const xCheck = arr => arr.every(val => val === arr[0]);
-
-    const updateScore = (player, score) => {
-        const scoreDiv = document.querySelector(`.${player}-score`)
-        scoreDiv.innerText = score;
-        return;
-    }
-
-    const activeTurn = () => {
-        const p1board = document.querySelector(".player1-info")
-        const p2board = document.querySelector(".player2-info")
-        if (turn == p1name) {
-            p1board.classList.remove("inactive")
-            p2board.classList.add("inactive")
-        } else {
-            p2board.classList.remove("inactive")
-            p1board.classList.add("inactive")
-        }
-    }
-
-})();
-
-
-
-//testing AI:
-
-let origBoard = [
-    [00, 01, 02],
-    [10, "O", 12],
-    [20, 21, 22],
-]
-
-let huPlayer = "O";
-let aiPlayer = "X";
-
-//creates 2D array of available spaces to play
-function emptySpace(arr) {
-    const freeSpaceArray = [];
-    for (i = 0; i < arr.length; i++) {
-        for (j = 0; j < arr[i].length; j++) {
-            if ((arr[i][j] != "X") && (arr[i][j] != "O")) {
-                freeSpaceArray.push(arr[i][j]);
-            }
-        }
-    }
-    return freeSpaceArray;
-}
-
-
-//checks 3D array for a winner
 function checkWinner(board, player) {
 
     const diagUpEqual = (player, board) => ((board[0][0] === player) && (board[0][0] === board[1][1]) && (board[0][0] === board[2][2]));
@@ -425,6 +356,56 @@ function checkWinner(board, player) {
 
 }
 
+const updateScore = (player, score) => {
+    const scoreDiv = document.querySelector(`.${player}-score`)
+    scoreDiv.innerText = score;
+    return;
+}
+
+const activeTurn = () => {
+    const p1board = document.querySelector(".player1-info")
+    const p2board = document.querySelector(".player2-info")
+    if (turn == p1name) {
+        p1board.classList.remove("inactive")
+        p2board.classList.add("inactive")
+    } else {
+        p2board.classList.remove("inactive")
+        p1board.classList.add("inactive")
+    }
+}
+
+}) ();
+
+
+
+//testing AI:
+
+let origBoard = [
+    [00, 01, 02],
+    [10, "O", 12],
+    [20, 21, 22],
+]
+
+let huPlayer = "O";
+let aiPlayer = "X";
+
+//creates 2D array of available spaces to play
+function emptySpace(arr) {
+    const freeSpaceArray = [];
+    for (i = 0; i < arr.length; i++) {
+        for (j = 0; j < arr[i].length; j++) {
+            if ((arr[i][j] != "X") && (arr[i][j] != "O")) {
+                freeSpaceArray.push(arr[i][j]);
+            }
+        }
+    }
+    return freeSpaceArray;
+}
+
+
+//checks 3D array for a winner
+
+/*
 let bestSpot = minimax(origBoard, aiPlayer)
 console.log("index:" + bestSpot.index)
 
@@ -508,4 +489,4 @@ function minimax(newBoard, player, depth = 0) {
     return moves[bestMove];
 
 }
-
+*/
