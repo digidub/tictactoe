@@ -1,56 +1,57 @@
-//Module to produce the game board array
-const MakeGame = (() => {
+//Module to produce the underlying game board array
+const GameBoard = (() => {
 
-    let board = [];
+    let arr = [];
 
-    function boardFunc() {
-        board = new Array(3);
-        for (let i = 0; i < board.length; i++) {
-            board[i] = new Array(3);
-            for (let j = 0; j < board[i].length; j++) {
-                board[i][j] = `${i}${j}`;
+    function buildArr() {
+        arr = new Array(3);
+        for (let i = 0; i < arr.length; i++) {
+            arr[i] = new Array(3);
+            for (let j = 0; j < arr[i].length; j++) {
+                arr[i][j] = `${i}${j}`;
             };
         };
-        return this.board = board;
+        return this.arr = arr;
+    };
+
+    function resetArr() {
+        this.arr = [];
+        this.arr = buildArr();
     };
 
     return {
-
-        board,
-        boardFunc
-
+        arr,
+        buildArr,
+        resetArr
     };
 })();
 
-//uses the MakeGame module to produce the HTML elements using the game board array
-const GameBoard = (() => {
+//uses the GameBoard module to produce the HTML elements using the game board array
+const GameDOM = (() => {
 
-    let _cell;
-    let board = "";
-    let _gameBoard;
+    let _boardArr, _gameBoardDiv;
 
     const populate = () => {
 
-        if (board == "") {
-            board = MakeGame.boardFunc();
-            _gameBoard = document.querySelector('.board')
+        if (GameBoard.arr.length === 0) { //checks to see whether game board array already exists
+            _boardArr = GameBoard.buildArr(); //makes it if it doesnt
+            _gameBoardDiv = document.querySelector('.board')
             populateLoop("cell-hidden");
         }
-        else {
-            _gameBoard.innerHTML = "";
-            board = MakeGame.boardFunc();
+        else { //if it does already exist
+            _gameBoardDiv.innerHTML = ""; //reset the GameBoard DOM element
+            _boardArr = GameBoard.resetArr(); //recreate the gameboard array
             populateLoop("cell-shown");
         }
     }
 
     const populateLoop = (gameState) => {
-        for (let x = 0; x < board.length; x++) {
-
-            for (let y = 0; y < board[x].length; y++) {
-                _cell = document.createElement("div");
+        for (let i = 0; i < _boardArr.length; i++) {
+            for (let j = 0; j < _boardArr[i].length; j++) {
+                let _cell = document.createElement("div");
                 _cell.setAttribute('class', `${gameState}`);
-                _cell.setAttribute('id', `${board[x][y]}`);
-                _gameBoard.appendChild(_cell);
+                _cell.setAttribute('id', `${_boardArr[i][j]}`);
+                _gameBoardDiv.appendChild(_cell);
             }
         }
     }
@@ -168,7 +169,7 @@ const gameState = (() => {
     async function removeStart(startDivHidden) {
         await promiseTransition(startDivHidden, "opacity", "0");
         startDivHidden.remove();
-        GameBoard.populate();
+        GameDOM.populate();
         setTimeout(showBoard, 1);
     }
 
@@ -285,7 +286,7 @@ const gameState = (() => {
         splitIndexValue = gameArrayIndex.split("");
         splitValueX = gameArrayIndex[0];
         splitValueY = gameArrayIndex[1];
-        MakeGame.board[splitValueX][splitValueY] = piece;
+        GameBoard.arr[splitValueX][splitValueY] = piece;
         e.target.innerHTML = piece;
         if (turnTally > 3) {
             winCondition();
@@ -300,32 +301,32 @@ const gameState = (() => {
                 player1.addPoint();
                 updateScore('player1', player1.getScore());
                 turnTally = 0;
-                GameBoard.populate();
+                GameDOM.populate();
             }
             else {
                 player2.addPoint();
                 updateScore('player2', player2.getScore())
                 turnTally = 0;
-                GameBoard.populate();
+                GameDOM.populate();
             }
 
             return;
         }
         else if (turnTally > 7) {
-            GameBoard.populate();
+            GameDOM.populate();
             turnTally = 0;
             return;
         }
         return;
     };
 
-    const diagUpEqual = () => ((MakeGame.board[0][0] === MakeGame.board[1][1]) && (MakeGame.board[0][0] === MakeGame.board[2][2]))
+    const diagUpEqual = () => ((GameBoard.arr[0][0] === GameBoard.arr[1][1]) && (GameBoard.arr[0][0] === GameBoard.arr[2][2]))
 
-    const diagDownEqual = () => ((MakeGame.board[0][2] === MakeGame.board[1][1]) && (MakeGame.board[0][2] === MakeGame.board[2][0]))
+    const diagDownEqual = () => ((GameBoard.arr[0][2] === GameBoard.arr[1][1]) && (GameBoard.arr[0][2] === GameBoard.arr[2][0]))
 
     const rowEqual = function () {
-        for (i = 0; i < MakeGame.board.length; i++) {
-            if (xCheck(MakeGame.board[i])) {
+        for (i = 0; i < GameBoard.arr.length; i++) {
+            if (xCheck(GameBoard.arr[i])) {
                 return true;
             }
         }
@@ -333,8 +334,8 @@ const gameState = (() => {
     }
 
     const columnEqual = function () {
-        for (i = 0; i < MakeGame.board[0].length; i++) {
-            if ((MakeGame.board[0][i] === MakeGame.board[1][i]) && (MakeGame.board[0][i] === MakeGame.board[2][i])) {
+        for (i = 0; i < GameBoard.arr[0].length; i++) {
+            if ((GameBoard.arr[0][i] === GameBoard.arr[1][i]) && (GameBoard.arr[0][i] === GameBoard.arr[2][i])) {
                 return true;
             }
         }
@@ -368,7 +369,7 @@ const gameState = (() => {
 //testing AI:
 
 let origBoard = [
-    [00,01,02],
+    [00, 01, 02],
     [10, "O", 12],
     [20, 21, 22],
 ]
@@ -424,18 +425,16 @@ function checkWinner(board, player) {
 
 }
 
-
-
 let bestSpot = minimax(origBoard, aiPlayer)
 console.log("index:" + bestSpot.index)
-console.log("function calls: " + functionCalls)
+
 
 
 
 //minimax function
-function minimax(newBoard, player, depth=0) {
+function minimax(newBoard, player, depth = 0) {
 
-    let availSpots = emptySpace(origBoard);    
+    let availSpots = emptySpace(origBoard);
 
     if (checkWinner(newBoard, huPlayer)) {
         return { score: depth - 100 };
@@ -443,7 +442,7 @@ function minimax(newBoard, player, depth=0) {
         return { score: 100 - depth };
     } else if (availSpots.length == 0) {
         return { score: 0 };
-    }    
+    }
 
     let moves = [];
 
@@ -464,11 +463,11 @@ function minimax(newBoard, player, depth=0) {
         };
 
         //recursive function call
-        if (player == aiPlayer) {            
-            result = minimax(newBoard, huPlayer, depth+1);
+        if (player == aiPlayer) {
+            result = minimax(newBoard, huPlayer, depth + 1);
             move.score = result.score;
-        } else {            
-            result = minimax(newBoard, aiPlayer, depth+1);
+        } else {
+            result = minimax(newBoard, aiPlayer, depth + 1);
             move.score = result.score;
         };
 
@@ -482,7 +481,7 @@ function minimax(newBoard, player, depth=0) {
             let yCoOrd = splitCoOrds2[1];
             newBoard[xCoOrd][yCoOrd] = move.index
         };
-        
+
         moves.push(move);
 
 
@@ -505,7 +504,7 @@ function minimax(newBoard, player, depth=0) {
                 bestMove = i;
             }
         }
-    }    
+    }
     return moves[bestMove];
 
 }
