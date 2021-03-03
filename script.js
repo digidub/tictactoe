@@ -131,6 +131,34 @@ const gameState = (() => {
     const startButton = document.querySelector(".start");
     const scoreBoard = document.querySelectorAll(".player-hidden")
 
+    startButton.onclick = function () {
+        let p1text = document.querySelector(`[name="player1-name"]`).value;
+        let p2text = document.querySelector(`[name="player2-name"]`).value;
+        p2type = document.querySelector('input[name="type2"]:checked').value;
+        if (p1text != "") {
+            player1 = Player(p1text)
+        } else if (p1text == "") {
+            player1 = Player("Player 1")
+        };
+        if (p2text != "") {
+            player2 = Player(p2text)
+        } else if (p2text == "") {
+            player2 = Player("Player 2")
+        };
+        p1name = player1.getName();
+        p2name = player2.getName();
+        player1.num = "player1";
+        player2.num = "player2";
+        p1nameDisplay.innerHTML = `<h2>${player1.getName()}</h2>`
+        p2nameDisplay.innerHTML = `<h2>${player2.getName()}</h2>`
+        hideStartScreen();
+        showScoreBoard();
+        randomPiece();
+        setTimeout(whoStarts, 500);
+        activeTurn();
+        return;
+    }
+
     function showScoreBoard() {
         for (let i = 0; i < scoreBoard.length; i++) {
             scoreBoard[i].classList.add("player-shown")
@@ -172,35 +200,6 @@ const gameState = (() => {
         setTimeout(showBoard, 1);
     }
 
-    startButton.onclick = function () {
-        let p1text = document.querySelector(`[name="player1-name"]`).value;
-        let p2text = document.querySelector(`[name="player2-name"]`).value;
-        p2type = document.querySelector('input[name="type2"]:checked').value;
-        if (p1text != "") {
-            player1 = Player(p1text)
-        } else if (p1text == "") {
-            player1 = Player("Player 1")
-        };
-        if (p2text != "") {
-            player2 = Player(p2text)
-        } else if (p2text == "") {
-            player2 = Player("Player 2")
-        };
-        p1name = player1.getName();
-        p2name = player2.getName();
-        player1.num = "player1";
-        player2.num = "player2";
-        p1nameDisplay.innerHTML = `<h2>${player1.getName()}</h2>`
-        p2nameDisplay.innerHTML = `<h2>${player2.getName()}</h2>`
-        hideStartScreen();
-        showScoreBoard();
-        randomPiece();
-        setTimeout(whoStarts, 500);
-        activeTurn();
-        return;
-    }
-
-
     const randomPiece = () => {
 
         let coinFlip = Math.round(Math.random());
@@ -240,11 +239,11 @@ const gameState = (() => {
 
     const nextTurn = () => {
         if (turn == p1name) {
-            turn = p2name            
+            turn = p2name
             if (p2type == "AI") AImove();
         }
         else if (turn == p2name) {
-            turn = p1name            
+            turn = p1name
         }
         activeTurn();
         return turn;
@@ -254,26 +253,26 @@ const gameState = (() => {
         if (e.target.className == "cell-shown") {
             if (turn == p1name) {
                 if (player1.getPiece() == "X") {
-                    e.target.classList.add('cell-hover-pink')
-                } else e.target.classList.add('cell-hover-green')
+                    e.target.classList.add('cell-hover-X')
+                } else e.target.classList.add('cell-hover-O')
             }
             else if ((turn == p2name) && (p2type == "human")) {
                 if (player2.getPiece() == "X") {
-                    e.target.classList.add('cell-hover-pink')
-                } else e.target.classList.add('cell-hover-green')
+                    e.target.classList.add('cell-hover-X')
+                } else e.target.classList.add('cell-hover-O')
             }
         }
         else return;
     }
 
     board.onmouseout = function (e) {
-        e.target.classList.remove('cell-hover-pink');
-        e.target.classList.remove('cell-hover-green')
+        e.target.classList.remove('cell-hover-X');
+        e.target.classList.remove('cell-hover-O')
         return;
     };
 
     board.onclick = function (e) {
-        if ((e.target.className == "cell-shown cell-hover-pink") || (e.target.className == "cell-shown cell-hover-green")) {
+        if ((e.target.className == "cell-shown cell-hover-X") || (e.target.className == "cell-shown cell-hover-O")) {
             if (!e.target.innerHTML) {
                 if (turn == p1name) {
                     placePiece(e, p1piece);
@@ -297,7 +296,7 @@ const gameState = (() => {
                 whoStarts();
                 return;
             };
-        };        
+        };
         nextTurn();
     }
 
@@ -315,7 +314,7 @@ const gameState = (() => {
                 whoStarts();
                 return;
             };
-        };        
+        };
         nextTurn();
     }
 
@@ -343,30 +342,67 @@ const gameState = (() => {
     };
 
     function checkWinner(board, player) {
-        const diagUpEqual = (board, player) => ((board[0][0] === player) && (board[0][0] === board[1][1]) && (board[0][0] === board[2][2]));
-        const diagDownEqual = (board, player) => ((board[0][2] === player) && (board[0][2] === board[1][1]) && (board[0][2] === board[2][0]));
+        const diagDownEqual = (board, player) => ((board[0][0] === player) && (board[0][0] === board[1][1]) && (board[0][0] === board[2][2]));
+
+        const diagUpEqual = (board, player) => ((board[0][2] === player) && (board[0][2] === board[1][1]) && (board[0][2] === board[2][0]));
+
         const rowEqual = function (board, player) {
             for (i = 0; i < board.length; i++) {
                 if (xCheck(board[i], player)) {
+                    for (j = 0; j < board[i].length; j++) {
+                        let cell = document.getElementById(`${i}${j}`)
+                        cell.classList.add(`cell-hover-${player}`)
+                    }
                     return true;
                 }
             }
             return false;
         }
+
         const xCheck = (board, player) => board.every(val => val === player);
+
         const columnEqual = function (board, player) {
-            for (i = 0; i < board[0].length; i++) {
+            for (let i = 0; i < board[0].length; i++) {
                 if ((board[0][i] === player) && (board[0][i] === board[1][i]) && (board[0][i] === board[2][i])) {
+                    for (let j = 0; j < board[0].length; j++) {
+                        let cell = document.getElementById(`${j}${i}`)
+                        cell.classList.add(`cell-hover-${player}`)
+                    }
                     return true;
                 }
             }
             return false;
         }
         if ((diagUpEqual(board, player)) || (diagDownEqual(board, player)) || (rowEqual(board, player)) || (columnEqual(board, player))) {
+
+            if (diagDownEqual(board, player)) {
+                for (let i = 0; i < 3; i++) {
+                    let cell = document.getElementById(`${i}${i}`)
+                    cell.classList.add(`cell-hover-${player}`)
+                }
+            }
+
+            if (diagUpEqual(board, player)) {
+                let cells = [];
+                cells.push(document.getElementById(`02`))
+                cells.push(document.getElementById(`11`))
+                cells.push(document.getElementById(`20`))
+                for (let i = 0; i < 3; i++) {
+                    cells[i].classList.add(`cell-hover-${player}`)
+                }
+            }
+
+            if (rowEqual(board, player)) {
+
+            }
+
+
             return true
         }
         else return false;
     }
+
+
 
     const updateScore = (player, score) => {
         const scoreDiv = document.querySelector(`.${player}-score`)
