@@ -124,7 +124,7 @@ const gameState = (() => {
 
     let turn;
     let turnTally = 0
-    let p1name, p2name, p1piece, p2piece;
+    let p1name, p2name, p1piece, p2piece, p2type
 
     const p1nameDisplay = document.querySelector(".player1-name");
     const p2nameDisplay = document.querySelector(".player2-name");
@@ -167,6 +167,7 @@ const gameState = (() => {
             div.addEventListener('transitionend', transitionEnded);
         });
 
+
     async function removeStart(startDivHidden) {
         await promiseTransition(startDivHidden, "opacity", "0");
         startDivHidden.remove();
@@ -177,6 +178,7 @@ const gameState = (() => {
     startButton.onclick = function () {
         let p1text = document.querySelector(`[name="player1-name"]`).value;
         let p2text = document.querySelector(`[name="player2-name"]`).value;
+        p2type = document.querySelector('input[name="type2"]:checked').value;
         if (p1text != "") {
             player1 = Player(p1text)
         } else if (p1text == "") {
@@ -196,7 +198,7 @@ const gameState = (() => {
         hideStartScreen();
         showScoreBoard();
         randomPiece();
-        whoStarts();
+        setTimeout(whoStarts, 500);
         activeTurn();
         return;
     }
@@ -226,24 +228,26 @@ const gameState = (() => {
     }
 
     const whoStarts = () => {
-
         let coinFlip = Math.round(Math.random());
-        if (coinFlip === 0) return turn = p1name
-        else return turn = p2name;
-
+        if (coinFlip === 0) {
+            turn = p1name;
+            activeTurn();
+            return turn;
+        }
+        else if (p2type == "AI") {
+            turn = p2name
+            activeTurn();
+            AImove();
+        } else return turn = p2name;
     };
 
     const nextTurn = () => {
-
         if (turn == p1name) {
-            turn = p2name
-            turnTally++
-            turn = p2name;
+            turn = p2name            
+            if (p2type == "AI") AImove();
         }
         else if (turn == p2name) {
-            turn = p1name
-            turnTally++
-            turn = p1name;
+            turn = p1name            
         }
         activeTurn();
         return turn;
@@ -251,13 +255,12 @@ const gameState = (() => {
 
     board.onmouseover = function (e) {
         if (e.target.className == "cell-shown") {
-
             if (turn == p1name) {
                 if (player1.getPiece() == "X") {
                     e.target.classList.add('cell-hover-pink')
                 } else e.target.classList.add('cell-hover-green')
             }
-            else if (turn == p2name) {
+            else if ((turn == p2name) && (p2type == "human")) {
                 if (player2.getPiece() == "X") {
                     e.target.classList.add('cell-hover-pink')
                 } else e.target.classList.add('cell-hover-green')
@@ -291,10 +294,31 @@ const gameState = (() => {
         splitValueY = gameArrayIndex[1];
         GameBoard.arr[splitValueX][splitValueY] = piece;
         e.target.innerHTML = piece;
-        if (turnTally > 3) {
-            winCondition();
+        turnTally++
+        if (turnTally > 4) {
+            if (winCondition()) {
+                whoStarts();
+                return;
+            };
+        };        
+        nextTurn();
+    }
 
-        }
+    const AImove = () => {
+        let AIbestMove = minimax(GameBoard.arr, p2piece);
+        AImoveCoOrds = AIbestMove.index.toString().split("");
+        let xMove = AImoveCoOrds[0]
+        let yMove = AImoveCoOrds[1]
+        GameBoard.arr[xMove][yMove] = p2piece
+        let placeDOM = document.getElementById(`${xMove}${yMove}`)
+        placeDOM.innerHTML = p2piece
+        turnTally++
+        if (turnTally > 4) {
+            if (winCondition()) {
+                whoStarts();
+                return;
+            };
+        };        
         nextTurn();
     }
 
@@ -306,17 +330,15 @@ const gameState = (() => {
     }
 
     function winCondition() {
-        if (turn == p1name) {
-            if (checkWinner(GameBoard.arr, p1piece)) {
-                winnerFound(player1)
-            }
+        if (checkWinner(GameBoard.arr, p1piece)) {
+            winnerFound(player1)
+            return;
         }
-        else if (turn == p2name) {
-            if (checkWinner(GameBoard.arr, p2piece)) {
-                winnerFound(player2)
-            }
-        }
-        else if (turnTally > 7) { //evaluates draw
+        else if (checkWinner(GameBoard.arr, p2piece)) {
+            winnerFound(player2)
+            return;
+        };
+        if (turnTally > 7) { //evaluates draw
             GameDOM.populate();
             turnTally = 0;
             return;
@@ -324,12 +346,9 @@ const gameState = (() => {
     };
 
     function checkWinner(board, player) {
-
-        const diagUpEqual = (player, board) => ((board[0][0] === player) && (board[0][0] === board[1][1]) && (board[0][0] === board[2][2]));
-
-        const diagDownEqual = (player, board) => ((board[0][2] === player) && (board[0][2] === board[1][1]) && (board[0][2] === board[2][0]));
-
-        const rowEqual = function (player, board) {
+        const diagUpEqual = (board, player) => ((board[0][0] === player) && (board[0][0] === board[1][1]) && (board[0][0] === board[2][2]));
+        const diagDownEqual = (board, player) => ((board[0][2] === player) && (board[0][2] === board[1][1]) && (board[0][2] === board[2][0]));
+        const rowEqual = function (board, player) {
             for (i = 0; i < board.length; i++) {
                 if (xCheck(board[i], player)) {
                     return true;
@@ -337,10 +356,8 @@ const gameState = (() => {
             }
             return false;
         }
-
         const xCheck = (board, player) => board.every(val => val === player);
-
-        const columnEqual = function (player, board) {
+        const columnEqual = function (board, player) {
             for (i = 0; i < board[0].length; i++) {
                 if ((board[0][i] === player) && (board[0][i] === board[1][i]) && (board[0][i] === board[2][i])) {
                     return true;
@@ -348,12 +365,10 @@ const gameState = (() => {
             }
             return false;
         }
-
-        if ((diagUpEqual(player, board)) || (diagDownEqual(player, board)) || (rowEqual(player, board)) || (columnEqual(player, board))) {
+        if ((diagUpEqual(board, player)) || (diagDownEqual(board, player)) || (rowEqual(board, player)) || (columnEqual(board, player))) {
             return true
         }
         else return false;
-
     }
 
     const updateScore = (player, score) => {
@@ -374,16 +389,8 @@ const gameState = (() => {
         }
     }
 
-
-
-})();
-
-
-const AI = (() => {
-
     //creates 2D array of available spaces to play
     function emptySpace(arr) {
-
         const freeSpaceArray = [];
         for (i = 0; i < arr.length; i++) {
             for (j = 0; j < arr[i].length; j++) {
@@ -397,63 +404,43 @@ const AI = (() => {
 
     //minimax function
     function minimax(newBoard, player, depth = 0) {
-
-        let availSpots = emptySpace(origBoard);
-
-        if (checkWinner(newBoard, huPlayer)) {
+        let availSpots = emptySpace(GameBoard.arr);
+        if (checkWinner(newBoard, p1piece)) {
             return { score: depth - 100 };
-        } else if (checkWinner(newBoard, aiPlayer)) {
+        } else if (checkWinner(newBoard, p2piece)) {
             return { score: 100 - depth };
         } else if (availSpots.length == 0) {
             return { score: 0 };
         }
-
         let moves = [];
-
         for (let i = 0; i < availSpots.length; i++) {
-
             let move = {};
-
-            //check co-ordinates of board 
-            if (availSpots[i] < 4) { //check if its first row
-                move.index = newBoard[0][availSpots[i]]
-                newBoard[0][availSpots[i]] = player
-            } else {
-                splitCoOrds = availSpots[i].toString().split("");
-                let xCoOrd = splitCoOrds[0]
-                let yCoOrd = splitCoOrds[1]
-                move.index = newBoard[xCoOrd][yCoOrd]
-                newBoard[xCoOrd][yCoOrd] = player
-            };
+            splitCoOrds = availSpots[i].toString().split("");
+            let xCoOrd = splitCoOrds[0]
+            let yCoOrd = splitCoOrds[1]
+            move.index = newBoard[xCoOrd][yCoOrd]
+            newBoard[xCoOrd][yCoOrd] = player
 
             //recursive function call
-            if (player == aiPlayer) {
-                result = minimax(newBoard, huPlayer, depth + 1);
+            if (player == p2piece) {
+                result = minimax(newBoard, p1piece, depth + 1);
                 move.score = result.score;
             } else {
-                result = minimax(newBoard, aiPlayer, depth + 1);
+                result = minimax(newBoard, p2piece, depth + 1);
                 move.score = result.score;
             };
 
-            //test to reset the board position to empty depending on coordinates
-            if (availSpots[i] < 4) {
-                newBoard[0][availSpots[i]] = move.index
-            }
-            else {
-                let splitCoOrds2 = availSpots[i].toString().split("");
-                let xCoOrd = splitCoOrds2[0];
-                let yCoOrd = splitCoOrds2[1];
-                newBoard[xCoOrd][yCoOrd] = move.index
-            };
-
+            //test to reset the board position to empty depending on coordinates            
+            let splitCoOrds2 = availSpots[i].toString().split("");
+            let xCoOrd2 = splitCoOrds2[0];
+            let yCoOrd2 = splitCoOrds2[1];
+            newBoard[xCoOrd2][yCoOrd2] = move.index
             moves.push(move);
-
-
         }
 
         let bestMove;
 
-        if (player === aiPlayer) {
+        if (player === p2piece) {
             let bestScore = -10000;
             for (let i = 0; i < moves.length; i++) {
                 if (moves[i].score > bestScore) {
@@ -473,25 +460,8 @@ const AI = (() => {
         return moves[bestMove];
     }
 
+    return {
+        turn
+    }
+
 })();
-
-
-
-/*testing AI:
-
-let origBoard = [
-    [00, 01, 02],
-    [10, "O", 12],
-    [20, 21, 22],
-]
-
-let huPlayer = "O";
-let aiPlayer = "X";
-
-
-
-//checks 3D array for a winner
-
-let bestSpot = minimax(origBoard, aiPlayer)
-console.log("index:" + bestSpot.index)
-*/
