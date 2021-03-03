@@ -56,9 +56,6 @@ const GameDOM = (() => {
             }
         }
     }
-
-
-
     return {
         populate,
     }
@@ -458,10 +455,6 @@ const gameState = (() => {
             }
         }
         return moves[bestMove];
-    }
-
-    return {
-        turn
     }
 
 })();
