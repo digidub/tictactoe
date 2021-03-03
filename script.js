@@ -342,11 +342,32 @@ const gameState = (() => {
     };
 
     function checkWinner(board, player) {
-        const diagDownEqual = (board, player) => ((board[0][0] === player) && (board[0][0] === board[1][1]) && (board[0][0] === board[2][2]));
 
-        const diagUpEqual = (board, player) => ((board[0][2] === player) && (board[0][2] === board[1][1]) && (board[0][2] === board[2][0]));
+        const diagDownEqual = (board, player) => {
+            if ((board[0][0] === player) && (board[0][0] === board[1][1]) && (board[0][0] === board[2][2])) {
+                for (let i = 0; i < 3; i++) {
+                    let cell = document.getElementById(`${i}${i}`)
+                    cell.classList.add(`cell-hover-${player}`)
+                }
+                return true;
+            }
+        }
+
+        const diagUpEqual = (board, player) => {
+            if ((board[0][2] === player) && (board[0][2] === board[1][1]) && (board[0][2] === board[2][0])) {
+                let cells = [];
+                cells.push(document.getElementById(`02`))
+                cells.push(document.getElementById(`11`))
+                cells.push(document.getElementById(`20`))
+                for (let i = 0; i < 3; i++) {
+                    cells[i].classList.add(`cell-hover-${player}`)
+                }
+                return true;
+            }
+        }
 
         const rowEqual = function (board, player) {
+            const xCheck = (board, player) => board.every(val => val === player);
             for (i = 0; i < board.length; i++) {
                 if (xCheck(board[i], player)) {
                     for (j = 0; j < board[i].length; j++) {
@@ -359,7 +380,7 @@ const gameState = (() => {
             return false;
         }
 
-        const xCheck = (board, player) => board.every(val => val === player);
+        
 
         const columnEqual = function (board, player) {
             for (let i = 0; i < board[0].length; i++) {
@@ -374,29 +395,6 @@ const gameState = (() => {
             return false;
         }
         if ((diagUpEqual(board, player)) || (diagDownEqual(board, player)) || (rowEqual(board, player)) || (columnEqual(board, player))) {
-
-            if (diagDownEqual(board, player)) {
-                for (let i = 0; i < 3; i++) {
-                    let cell = document.getElementById(`${i}${i}`)
-                    cell.classList.add(`cell-hover-${player}`)
-                }
-            }
-
-            if (diagUpEqual(board, player)) {
-                let cells = [];
-                cells.push(document.getElementById(`02`))
-                cells.push(document.getElementById(`11`))
-                cells.push(document.getElementById(`20`))
-                for (let i = 0; i < 3; i++) {
-                    cells[i].classList.add(`cell-hover-${player}`)
-                }
-            }
-
-            if (rowEqual(board, player)) {
-
-            }
-
-
             return true
         }
         else return false;
