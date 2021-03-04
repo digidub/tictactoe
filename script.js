@@ -222,7 +222,7 @@ const gameState = (() => {
             displayPlayerPiece(p1piece, p2piece);
             return;
         }
-    }    
+    }
 
     const whoStarts = () => {
         let coinFlip = Math.round(Math.random());
@@ -230,8 +230,7 @@ const gameState = (() => {
             turn = p1name;
             activeTurn();
             return turn;
-        }
-        else if (p2type == "AI") {
+        } else if (p2type == "AI") {
             turn = p2name
             activeTurn();
             AImove();
@@ -284,7 +283,7 @@ const gameState = (() => {
         else return;
     }
 
-        function placePiece(e, piece) {
+    function placePiece(e, piece) {
         gameArrayIndex = e.target.attributes.id.value;
         splitIndexValue = gameArrayIndex.split("");
         splitValueX = gameArrayIndex[0];
@@ -301,34 +300,55 @@ const gameState = (() => {
         nextTurn();
     }
 
+    function AIstartingMove() {
+        startingMove = ["00", "02", "11", "20", "22"]
+        let randomStartIndex = Math.floor(Math.random() * startingMove.length);
+        return startingMove[randomStartIndex]
+    }
+
     const AImove = () => {
-        if (turnTally > 8) return;
-        let AIbestMove = minimax(GameBoard.arr, p2piece);
-        AImoveCoOrds = AIbestMove.index.toString().split("");
-        let xMove = AImoveCoOrds[0]
-        let yMove = AImoveCoOrds[1]
-        GameBoard.arr[xMove][yMove] = p2piece
-        let placeDOM = document.getElementById(`${xMove}${yMove}`)
-        placeDOM.innerHTML = p2piece
+
+        if (turnTally > 8) return; //test to see whether game is over
+
+        if (turnTally == 0) {
+            let startingMove = AIstartingMove()
+            AIplaceDOM(startingMove)
+        }
+        if (turnTally > 0) {
+            let bestMove = minimax(GameBoard.arr, p2piece);
+            AIplaceDOM(bestMove.index)
+        }
         turnTally++
+
         if (turnTally > 4) {
             if (winCondition()) {
                 whoStarts();
                 return;
             };
         };
+
         nextTurn();
+    }
+
+    function AIplaceDOM(move) {
+        AImoveCoOrds = move.toString().split("");
+        let xMove = AImoveCoOrds[0]
+        let yMove = AImoveCoOrds[1]
+        GameBoard.arr[xMove][yMove] = p2piece
+        let placeDOM = document.getElementById(`${xMove}${yMove}`)
+        placeDOM.innerHTML = p2piece
+        return;
     }
 
     function announceWinner(player) {
         let announceCell = document.getElementById("11")
         announceCell.innerHTML = `${player} wins!`
-        winner = player        
+        winner = player
         announceCell.onclick = function () {
             winner = "";
             GameDOM.populate();
             turnTally = 0;
-            whoStarts()            
+            whoStarts()
         }
 
     }
@@ -336,33 +356,33 @@ const gameState = (() => {
     function announceDraw() {
         let announceCell = document.getElementById("11")
         announceCell.innerHTML = `Tie! Nobody wins.`
-        winner = "none"        
+        winner = "none"
         announceCell.onclick = function () {
-            winner = "";            
+            winner = "";
             GameDOM.populate();
             turnTally = 0;
-            whoStarts();            
+            whoStarts();
         }
 
-    }    
+    }
 
     function winnerFound(player) {
         player.addPoint()
-        updateScore(player.num, player.getScore());        
+        updateScore(player.num, player.getScore());
         announceWinner(turn);
     }
 
     function winCondition() {
         if (checkWinner(GameBoard.arr, p1piece)) {
             winnerFound(player1)
-            return;            
+            return;
         }
         else if (checkWinner(GameBoard.arr, p2piece)) {
             winnerFound(player2)
             return;
         };
         if (turnTally > 8) { //evaluates draw
-            announceDraw();            
+            announceDraw();
             return;
         }
     };
@@ -466,13 +486,13 @@ const gameState = (() => {
             }
         }
         return freeSpaceArray;
-    }
+    }    
 
     //minimax function
-    function minimax(newBoard, player, depth = 0) {        
+    function minimax(newBoard, player, depth = 0) {
 
-        let availSpots = emptySpace(GameBoard.arr); 
-        
+        let availSpots = emptySpace(GameBoard.arr);
+
         if (checkWinner(newBoard, p1piece, "yes")) {
             return { score: depth - 100 };
         } else if (checkWinner(newBoard, p2piece, "yes")) {
