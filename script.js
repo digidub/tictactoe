@@ -122,6 +122,7 @@ const gameState = (() => {
     let turn;
     let turnTally = 0
     let p1name, p2name, p1piece, p2piece, p2type
+    let winner = "";
 
     const p1nameDisplay = document.querySelector(".player1-name");
     const p2nameDisplay = document.querySelector(".player2-name");
@@ -200,6 +201,13 @@ const gameState = (() => {
         setTimeout(showBoard, 1);
     }
 
+    const displayPlayerPiece = (p1, p2) => {
+        const p1pieceDiv = document.querySelector(".player1-piece")
+        const p2pieceDiv = document.querySelector(".player2-piece")
+        p1pieceDiv.innerHTML = `<button class="${p1}" role="radio" type="button">${p1}</button>`
+        p2pieceDiv.innerHTML = `<button class="${p2}" role="radio" type="button">${p2}</button>`
+    }
+
     const randomPiece = () => {
 
         let coinFlip = Math.round(Math.random());
@@ -214,14 +222,7 @@ const gameState = (() => {
             displayPlayerPiece(p1piece, p2piece);
             return;
         }
-    }
-
-    const displayPlayerPiece = (p1, p2) => {
-        const p1pieceDiv = document.querySelector(".player1-piece")
-        const p2pieceDiv = document.querySelector(".player2-piece")
-        p1pieceDiv.innerHTML = `<button class="${p1}" role="radio" type="button">${p1}</button>`
-        p2pieceDiv.innerHTML = `<button class="${p2}" role="radio" type="button">${p2}</button>`
-    }
+    }    
 
     const whoStarts = () => {
         let coinFlip = Math.round(Math.random());
@@ -272,7 +273,7 @@ const gameState = (() => {
     };
 
     board.onclick = function (e) {
-        if ((e.target.className == "cell-shown cell-hover-X") || (e.target.className == "cell-shown cell-hover-O")) {
+        if ((winner == "") && ((e.target.className == "cell-shown cell-hover-X") || (e.target.className == "cell-shown cell-hover-O"))) {
             if (!e.target.innerHTML) {
                 if (turn == p1name) {
                     placePiece(e, p1piece);
@@ -283,7 +284,7 @@ const gameState = (() => {
         else return;
     }
 
-    function placePiece(e, piece) {
+        function placePiece(e, piece) {
         gameArrayIndex = e.target.attributes.id.value;
         splitIndexValue = gameArrayIndex.split("");
         splitValueX = gameArrayIndex[0];
@@ -300,13 +301,8 @@ const gameState = (() => {
         nextTurn();
     }
 
-    function announceWinner(player) {
-        let announceCell = document.getElementById("11")
-        announceCell.innerHTML = `${player} wins!`
-
-    }
-
     const AImove = () => {
+        if (turnTally > 8) return;
         let AIbestMove = minimax(GameBoard.arr, p2piece);
         AImoveCoOrds = AIbestMove.index.toString().split("");
         let xMove = AImoveCoOrds[0]
@@ -317,32 +313,56 @@ const gameState = (() => {
         turnTally++
         if (turnTally > 4) {
             if (winCondition()) {
-                announceWinner(turn);
+                whoStarts();
                 return;
             };
         };
         nextTurn();
     }
 
+    function announceWinner(player) {
+        let announceCell = document.getElementById("11")
+        announceCell.innerHTML = `${player} wins!`
+        winner = player        
+        announceCell.onclick = function () {
+            winner = "";
+            GameDOM.populate();
+            turnTally = 0;
+            whoStarts()            
+        }
+
+    }
+
+    function announceDraw() {
+        let announceCell = document.getElementById("11")
+        announceCell.innerHTML = `Tie! Nobody wins.`
+        winner = "none"        
+        announceCell.onclick = function () {
+            winner = "";            
+            GameDOM.populate();
+            turnTally = 0;
+            whoStarts();            
+        }
+
+    }    
+
     function winnerFound(player) {
         player.addPoint()
-        updateScore(player.num, player.getScore());
-        turnTally = 0;
-        GameDOM.populate();
+        updateScore(player.num, player.getScore());        
+        announceWinner(turn);
     }
 
     function winCondition() {
         if (checkWinner(GameBoard.arr, p1piece)) {
             winnerFound(player1)
-            return;
+            return;            
         }
         else if (checkWinner(GameBoard.arr, p2piece)) {
             winnerFound(player2)
             return;
         };
-        if (turnTally > 7) { //evaluates draw
-            GameDOM.populate();
-            turnTally = 0;
+        if (turnTally > 8) { //evaluates draw
+            announceDraw();            
             return;
         }
     };
@@ -354,7 +374,7 @@ const gameState = (() => {
                 if (theory !== "yes") {
                     for (let i = 0; i < 3; i++) {
                         let cell = document.getElementById(`${i}${i}`)
-                        cell.classList.add(`cell-hover-${player}`)
+                        cell.classList.add(`cell-win-${player}`)
                     }
                     return true;
                 }
@@ -370,7 +390,7 @@ const gameState = (() => {
                     cells.push(document.getElementById(`11`))
                     cells.push(document.getElementById(`20`))
                     for (let i = 0; i < 3; i++) {
-                        cells[i].classList.add(`cell-hover-${player}`)
+                        cells[i].classList.add(`cell-win-${player}`)
                     }
                     return true;
                 }
@@ -385,7 +405,7 @@ const gameState = (() => {
                     if (theory !== "yes") {
                         for (j = 0; j < board[i].length; j++) {
                             let cell = document.getElementById(`${i}${j}`)
-                            cell.classList.add(`cell-hover-${player}`)
+                            cell.classList.add(`cell-win-${player}`)
                         }
                         return true;
                     }
@@ -401,7 +421,7 @@ const gameState = (() => {
                     if (theory !== "yes") {
                         for (let j = 0; j < board[0].length; j++) {
                             let cell = document.getElementById(`${j}${i}`)
-                            cell.classList.add(`cell-hover-${player}`)
+                            cell.classList.add(`cell-win-${player}`)
                         }
                         return true;
                     }
@@ -449,8 +469,10 @@ const gameState = (() => {
     }
 
     //minimax function
-    function minimax(newBoard, player, depth = 0) {
-        let availSpots = emptySpace(GameBoard.arr);
+    function minimax(newBoard, player, depth = 0) {        
+
+        let availSpots = emptySpace(GameBoard.arr); 
+        
         if (checkWinner(newBoard, p1piece, "yes")) {
             return { score: depth - 100 };
         } else if (checkWinner(newBoard, p2piece, "yes")) {
