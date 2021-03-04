@@ -89,6 +89,18 @@
     font-size: 25px;
 }
 
+.player2-type {
+    margin: 10px;
+    display: flex;
+    justify-content: center;
+    align-content: center;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: .075em;
+    color: rgb(90, 90, 90);
+    text-align: center;
+}
+
 .board {
     display: flex;
     flex-flow: row wrap;    
@@ -251,4 +263,8 @@ select:focus,
 textarea:focus,
 button:focus {
     outline: none;
+}
+
+input[type="radio"] {
+    margin: 0px 2px 0px 6px;
 }
