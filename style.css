@@ -121,7 +121,7 @@
     font-size: 40px;
 }
 
-.cell-hover-green {
+.cell-hover-O {
     cursor: pointer;
     background: #c2ebb5;
     display: flex;
@@ -134,7 +134,33 @@
     transition: opacity 0.8s ease-out;
 }
 
-.cell-hover-pink {
+.cell-hover-X {
+    cursor: pointer;
+    background: #e7bde7;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    width: 30%;
+    height: 30%;
+    opacity: 100;
+    transition: opacity 0.8s ease-out;
+}
+
+.cell-win-O {
+    cursor: pointer;
+    background: #c2ebb5;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    width: 30%;
+    height: 30%;
+    opacity: 100;
+    transition: opacity 0.8s ease-out;
+}
+
+.cell-win-X {
     cursor: pointer;
     background: #e7bde7;
     display: flex;
