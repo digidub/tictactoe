@@ -27,7 +27,7 @@ const GameBoard = (() => {
     };
 })();
 
-//uses the GameBoard module to produce the HTML elements using the game board array
+//uses the GameBoard module to create the DOM structure for the game
 const GameDOM = (() => {
 
     let _boardArr, _gameBoardDiv;
@@ -62,7 +62,7 @@ const GameDOM = (() => {
 })();
 
 
-//Player object used for storing and retreiving player's name, piece, score
+//Player object used for storing and retreiving player's name, piece, score, and type (for player 2 - AI)
 const Player = (playerName) => {
 
     let score = 0;
@@ -96,28 +96,31 @@ const Player = (playerName) => {
         getName,
         getPiece,
         getScore,
-        addPoint,       
+        addPoint,
 
     };
 }
 
 
-//controls the state of the game, including: whose turn, total turns so far, how turns are displayed, the display of the board, checking to see if a player has won, and resetting the board.
+//controls the state of the game, including: whose turn, total turns so far, how turns are displayed, the display of the board, checking end state (wins and draw), and the player 2 AI
 const gameState = (() => {
 
+    //game state variables
     let turn;
     let turnTally = 0
     let p1name, p2name, p1piece, p2piece, p2type
     let winner = "";
 
+    //DOM identifierd
     const p1nameDisplay = document.querySelector(".player1-name");
     const p2nameDisplay = document.querySelector(".player2-name");
     const board = document.querySelector(".board");
     const startDiv = document.querySelector(".new-game-form-shown");
-
     const startButton = document.querySelector(".start");
     const scoreBoard = document.querySelectorAll(".player-hidden")
 
+
+    //starts the game and takes player name values & type
     startButton.onclick = function () {
         let p1text = document.querySelector(`[name="player1-name"]`).value;
         let p2text = document.querySelector(`[name="player2-name"]`).value;
@@ -146,6 +149,7 @@ const gameState = (() => {
         return;
     }
 
+    //displays scoreboard
     function showScoreBoard() {
         for (let i = 0; i < scoreBoard.length; i++) {
             scoreBoard[i].classList.add("player-shown")
@@ -153,6 +157,7 @@ const gameState = (() => {
         }
     }
 
+    //reveals game grid
     function showBoard() {
         let grid = board.querySelectorAll(".cell-hidden");
         for (i = 0; i < grid.length; i++) {
@@ -161,6 +166,7 @@ const gameState = (() => {
         }
     }
 
+    //hides the initial start screen
     function hideStartScreen() {
         startDiv.classList.add("new-game-form-hidden")
         startDiv.classList.remove("new-game-form-shown")
@@ -168,6 +174,7 @@ const gameState = (() => {
         removeStart(startDivHidden);
     }
 
+    //conrols animation transitions and removin start DIV from DOM
     const promiseTransition = (div, property, value) =>
         new Promise(resolve => {
             div.style[property] = value;
@@ -187,6 +194,7 @@ const gameState = (() => {
         setTimeout(showBoard, 1);
     }
 
+    //controls display of each players piece
     const displayPlayerPiece = (p1, p2) => {
         const p1pieceDiv = document.querySelector(".player1-piece")
         const p2pieceDiv = document.querySelector(".player2-piece")
@@ -194,8 +202,9 @@ const gameState = (() => {
         p2pieceDiv.innerHTML = `<button class="${p2}" role="radio" type="button">${p2}</button>`
     }
 
-    const randomPiece = () => {
 
+    //randomises players pieces
+    const randomPiece = () => {
         let coinFlip = Math.round(Math.random());
         if (coinFlip === 0) {
             p1piece = player1.setPiece("X");
@@ -210,6 +219,7 @@ const gameState = (() => {
         }
     }
 
+    //randomise who starts each round
     const whoStarts = () => {
         let coinFlip = Math.round(Math.random());
         if (coinFlip === 0) {
@@ -223,6 +233,7 @@ const gameState = (() => {
         } else return turn = p2name;
     };
 
+    //function for switching turns between players
     const nextTurn = () => {
         if (turn == p1name) {
             turn = p2name
@@ -235,28 +246,7 @@ const gameState = (() => {
         return turn;
     }
 
-    board.onmouseover = function (e) {
-        if (e.target.className == "cell-shown") {
-            if (turn == p1name) {
-                if (player1.getPiece() == "X") {
-                    e.target.classList.add('cell-hover-X')
-                } else e.target.classList.add('cell-hover-O')
-            }
-            else if ((turn == p2name) && (p2type == "human")) {
-                if (player2.getPiece() == "X") {
-                    e.target.classList.add('cell-hover-X')
-                } else e.target.classList.add('cell-hover-O')
-            }
-        }
-        else return;
-    }
-
-    board.onmouseout = function (e) {
-        e.target.classList.remove('cell-hover-X');
-        e.target.classList.remove('cell-hover-O')
-        return;
-    };
-
+    //click listener for placing pieces
     board.onclick = function (e) {
         if ((winner == "") && ((e.target.className == "cell-shown cell-hover-X") || (e.target.className == "cell-shown cell-hover-O"))) {
             if (!e.target.innerHTML) {
@@ -269,6 +259,7 @@ const gameState = (() => {
         else return;
     }
 
+    //place piece functionality
     function placePiece(e, piece) {
         gameArrayIndex = e.target.attributes.id.value;
         splitIndexValue = gameArrayIndex.split("");
@@ -286,15 +277,31 @@ const gameState = (() => {
         nextTurn();
     }
 
+    //highlights whose turn is active
+    const activeTurn = () => {
+        const p1board = document.querySelector(".player1-info")
+        const p2board = document.querySelector(".player2-info")
+        if (turn == p1name) {
+            p1board.classList.remove("inactive")
+            p2board.classList.add("inactive")
+        } else {
+            p2board.classList.remove("inactive")
+            p1board.classList.add("inactive")
+        }
+    }
+
+    //randomise AI starting move to best squares
     function AIstartingMove() {
         startingMove = ["00", "02", "11", "20", "22"]
         let randomStartIndex = Math.floor(Math.random() * startingMove.length);
         return startingMove[randomStartIndex]
     }
 
+
+    //overall AI move control function
     const AImove = () => {
 
-        if (turnTally > 8) return; //test to see whether game is over
+        if (turnTally > 8) return;
 
         if (turnTally == 0) {
             let startingMove = AIstartingMove()
@@ -316,6 +323,8 @@ const gameState = (() => {
         nextTurn();
     }
 
+
+    //responsible for showin the move in the DOM
     function AIplaceDOM(move) {
         AImoveCoOrds = move.toString().split("");
         let xMove = AImoveCoOrds[0]
@@ -326,6 +335,7 @@ const gameState = (() => {
         return;
     }
 
+    //announces winner in centre square
     function announceWinner(player) {
         let announceCell = document.getElementById("11")
         announceCell.innerHTML = `${player} wins!`
@@ -339,6 +349,7 @@ const gameState = (() => {
 
     }
 
+    //announces draw in centre square
     function announceDraw() {
         let announceCell = document.getElementById("11")
         announceCell.innerHTML = `Tie! Nobody wins.`
@@ -352,12 +363,21 @@ const gameState = (() => {
 
     }
 
+    //Point control function
     function winnerFound(player) {
         player.addPoint()
         updateScore(player.num, player.getScore());
         announceWinner(turn);
     }
 
+    //updates scoreboard display
+    const updateScore = (player, score) => {
+        const scoreDiv = document.querySelector(`.${player}-score`)
+        scoreDiv.innerText = score;
+        return;
+    }
+
+    //Game end state control function
     function winCondition() {
         if (checkWinner(GameBoard.arr, p1piece)) {
             winnerFound(player1)
@@ -373,11 +393,12 @@ const gameState = (() => {
         }
     };
 
+    //evaluates whether win has occurred, also used by AI for working out their best move.
     function checkWinner(board, player, theory) {
 
         const diagDownEqual = (board, player) => {
             if ((board[0][0] === player) && (board[0][0] === board[1][1]) && (board[0][0] === board[2][2])) {
-                if (theory !== "yes") {
+                if (theory !== "yes") { //if theory = "yes", AI is calculating best move and therefore winning highlight should not be applied.
                     for (let i = 0; i < 3; i++) {
                         let cell = document.getElementById(`${i}${i}`)
                         cell.classList.add(`cell-win-${player}`)
@@ -390,7 +411,7 @@ const gameState = (() => {
 
         const diagUpEqual = (board, player) => {
             if ((board[0][2] === player) && (board[0][2] === board[1][1]) && (board[0][2] === board[2][0])) {
-                if (theory !== "yes") {
+                if (theory !== "yes") { //if theory = "yes", AI is calculating best move and therefore winning highlight should not be applied.
                     let cells = [];
                     cells.push(document.getElementById(`02`))
                     cells.push(document.getElementById(`11`))
@@ -408,7 +429,7 @@ const gameState = (() => {
             const xCheck = (board, player) => board.every(val => val === player);
             for (i = 0; i < board.length; i++) {
                 if (xCheck(board[i], player)) {
-                    if (theory !== "yes") {
+                    if (theory !== "yes") { //if theory = "yes", AI is calculating best move and therefore winning highlight should not be applied.
                         for (j = 0; j < board[i].length; j++) {
                             let cell = document.getElementById(`${i}${j}`)
                             cell.classList.add(`cell-win-${player}`)
@@ -424,7 +445,7 @@ const gameState = (() => {
         const columnEqual = function (board, player) {
             for (let i = 0; i < board[0].length; i++) {
                 if ((board[0][i] === player) && (board[0][i] === board[1][i]) && (board[0][i] === board[2][i])) {
-                    if (theory !== "yes") {
+                    if (theory !== "yes") { //if theory = "yes", AI is calculating best move and therefore winning highlight should not be applied.
                         for (let j = 0; j < board[0].length; j++) {
                             let cell = document.getElementById(`${j}${i}`)
                             cell.classList.add(`cell-win-${player}`)
@@ -443,24 +464,6 @@ const gameState = (() => {
         else return false;
     }
 
-    const updateScore = (player, score) => {
-        const scoreDiv = document.querySelector(`.${player}-score`)
-        scoreDiv.innerText = score;
-        return;
-    }
-
-    const activeTurn = () => {
-        const p1board = document.querySelector(".player1-info")
-        const p2board = document.querySelector(".player2-info")
-        if (turn == p1name) {
-            p1board.classList.remove("inactive")
-            p2board.classList.add("inactive")
-        } else {
-            p2board.classList.remove("inactive")
-            p1board.classList.add("inactive")
-        }
-    }
-
     //creates 2D array of available spaces to play
     function emptySpace(arr) {
         const freeSpaceArray = [];
@@ -472,9 +475,9 @@ const gameState = (() => {
             }
         }
         return freeSpaceArray;
-    }    
+    }
 
-    //minimax function
+    //minimax AI function
     function minimax(newBoard, player, depth = 0) {
 
         let availSpots = emptySpace(GameBoard.arr);
@@ -533,5 +536,29 @@ const gameState = (() => {
         }
         return moves[bestMove];
     }
+
+    //highlight cell function
+    board.onmouseover = function (e) {
+        if (e.target.className == "cell-shown") {
+            if (turn == p1name) {
+                if (player1.getPiece() == "X") {
+                    e.target.classList.add('cell-hover-X')
+                } else e.target.classList.add('cell-hover-O')
+            }
+            else if ((turn == p2name) && (p2type == "human")) {
+                if (player2.getPiece() == "X") {
+                    e.target.classList.add('cell-hover-X')
+                } else e.target.classList.add('cell-hover-O')
+            }
+        }
+        else return;
+    }
+    
+    //unhighlight cell function
+    board.onmouseout = function (e) {
+        e.target.classList.remove('cell-hover-X');
+        e.target.classList.remove('cell-hover-O')
+        return;
+    };
 
 })();
