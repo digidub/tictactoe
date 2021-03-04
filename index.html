@@ -28,9 +28,22 @@
                     <div class="new-game-form-shown">
                         <div class="player-fields">
                             <div class="player-name-form"><input type="text" name="player1-name"
-                                    placeholder="player 1 name" required></div>
+                                    placeholder="player 1 name">                                
+                            </div>
                             <div class="player-name-form"><input type="text" name="player2-name"
-                                    placeholder="player 2 name" required></div>
+                                    placeholder="player 2 name">
+                                <div class="player2-type">
+                                    <div class="radio">
+                                        <input type="radio" name="type2" value="human" checked>
+                                        <label for="human">Human</label>
+                                    </div>
+                                    <div class="radio">
+                                        <input type="radio" name="type2" value="AI">
+                                        <label for="AI">AI</label>
+                                    </div>
+                                </div>
+                            </div>
+
                         </div>
                         <div><input type="submit" value="Start Game" class="start"></div>
                     </div>

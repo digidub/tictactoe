@@ -1,77 +1,78 @@
-//Module to produce the game board array
-const MakeGame = (() => {
+//Module to produce the underlying game board array
+const GameBoard = (() => {
 
-    let board = [];
+    let arr = [];
 
-    function boardFunc() {
-        board = new Array(3);
-        for (let i = 0; i < board.length; i++) {
-            board[i] = new Array(3);
-            for (let j = 0; j < board[i].length; j++) {
-                board[i][j] = `${i}${j}`;
+    function buildArr() {
+        arr = new Array(3);
+        for (let i = 0; i < arr.length; i++) {
+            arr[i] = new Array(3);
+            for (let j = 0; j < arr[i].length; j++) {
+                arr[i][j] = `${i}${j}`;
             };
         };
-        return this.board = board;
+        return this.arr = arr;
+    };
+
+    function resetArr() {
+        this.arr = [];
+        this.arr = buildArr();
+        return this.arr = arr;
     };
 
     return {
-
-        board,
-        boardFunc
-
+        arr,
+        buildArr,
+        resetArr
     };
 })();
 
-//uses the MakeGame module to produce the HTML elements using the game board array
-const GameBoard = (() => {
+//uses the GameBoard module to create the DOM structure for the game
+const GameDOM = (() => {
 
-    let _cell;
-    let board = "";
-    let _gameBoard;
+    let _boardArr, _gameBoardDiv;
 
     const populate = () => {
 
-        if (board == "") {
-            board = MakeGame.boardFunc();
-            _gameBoard = document.querySelector('.board')
+        if (GameBoard.arr.length === 0) { //checks to see whether game board array already exists
+            _boardArr = GameBoard.buildArr(); //makes it if it doesnt
+            _gameBoardDiv = document.querySelector('.board')
             populateLoop("cell-hidden");
         }
-        else {
-            _gameBoard.innerHTML = "";
-            board = MakeGame.boardFunc();
+        else { //if it does already exist
+            _gameBoardDiv.innerHTML = ""; //reset the GameBoard DOM element
+            _boardArr = GameBoard.resetArr(); //recreate the gameboard array
             populateLoop("cell-shown");
         }
     }
 
     const populateLoop = (gameState) => {
-        for (let x = 0; x < board.length; x++) {
-
-            for (let y = 0; y < board[x].length; y++) {
-                _cell = document.createElement("div");
+        for (let i = 0; i < _boardArr.length; i++) {
+            for (let j = 0; j < _boardArr[i].length; j++) {
+                let _cell = document.createElement("div");
                 _cell.setAttribute('class', `${gameState}`);
-                _cell.setAttribute('id', `${board[x][y]}`)
-                _gameBoard.appendChild(_cell);
+                _cell.setAttribute('id', `${_boardArr[i][j]}`);
+                _gameBoardDiv.appendChild(_cell);
             }
         }
     }
-
     return {
         populate,
     }
 })();
 
 
-//Player object used for storing and retreiving player's name, piece, score
+//Player object used for storing and retreiving player's name, piece, score, and type (for player 2 - AI)
 const Player = (playerName) => {
 
     let score = 0;
 
-    const getName = () => playerName;    
+    const getName = () => playerName;
     const getScore = () => score;
 
     function getPiece() {
         return this.piece;
-    } 
+    }
 
     function setPiece(piece) {
         this.piece = piece;
@@ -101,64 +102,29 @@ const Player = (playerName) => {
 }
 
 
-//controls the state of the game, including: whose turn, total turns so far, how turns are displayed, the display of the board, checking to see if a player has won, and resetting the board.
+//controls the state of the game, including: whose turn, total turns so far, how turns are displayed, the display of the board, checking end state (wins and draw), and the player 2 AI
 const gameState = (() => {
 
+    //game state variables
     let turn;
     let turnTally = 0
-    let p1name, p2name, p1piece, p2piece;
+    let p1name, p2name, p1piece, p2piece, p2type
+    let winner = "";
 
+    //DOM identifierd
     const p1nameDisplay = document.querySelector(".player1-name");
     const p2nameDisplay = document.querySelector(".player2-name");
     const board = document.querySelector(".board");
     const startDiv = document.querySelector(".new-game-form-shown");
-
     const startButton = document.querySelector(".start");
     const scoreBoard = document.querySelectorAll(".player-hidden")
 
-    function showScoreBoard() {
-        for (let i = 0; i < scoreBoard.length; i++) {
-            scoreBoard[i].classList.add("player-shown")
-            scoreBoard[i].classList.remove("player-hidden")
-        }
-    }
 
-    function showBoard() {
-        let grid = board.querySelectorAll(".cell-hidden");
-        for (i = 0; i < grid.length; i++) {
-            grid[i].classList.add("cell-shown");
-            grid[i].classList.remove("cell-hidden");
-        }
-    }
-
-    function hideStartScreen() {
-        startDiv.classList.add("new-game-form-hidden")
-        startDiv.classList.remove("new-game-form-shown")
-        const startDivHidden = document.querySelector(".new-game-form-hidden");
-        removeStart(startDivHidden);
-    }
-
-    const promiseTransition = (div, property, value) =>
-        new Promise(resolve => {
-            div.style[property] = value;
-            const transitionEnded = e => {
-                if (e.propertyName !== property) return;
-                div.removeEventListener('transitionend', transitionEnded);
-                resolve();
-            }
-            div.addEventListener('transitionend', transitionEnded);
-        });
-
-    async function removeStart(startDivHidden) {
-        await promiseTransition(startDivHidden, "opacity", "0");
-        startDivHidden.remove();
-        GameBoard.populate();
-        setTimeout(showBoard, 1);
-    }
-
+    //starts the game and takes player name values & type
     startButton.onclick = function () {
         let p1text = document.querySelector(`[name="player1-name"]`).value;
         let p2text = document.querySelector(`[name="player2-name"]`).value;
+        p2type = document.querySelector('input[name="type2"]:checked').value;
         if (p1text != "") {
             player1 = Player(p1text)
         } else if (p1text == "") {
@@ -171,19 +137,74 @@ const gameState = (() => {
         };
         p1name = player1.getName();
         p2name = player2.getName();
+        player1.num = "player1";
+        player2.num = "player2";
         p1nameDisplay.innerHTML = `<h2>${player1.getName()}</h2>`
         p2nameDisplay.innerHTML = `<h2>${player2.getName()}</h2>`
         hideStartScreen();
         showScoreBoard();
         randomPiece();
-        whoStarts();
+        setTimeout(whoStarts, 500);
         activeTurn();
         return;
     }
 
+    //displays scoreboard
+    function showScoreBoard() {
+        for (let i = 0; i < scoreBoard.length; i++) {
+            scoreBoard[i].classList.add("player-shown")
+            scoreBoard[i].classList.remove("player-hidden")
+        }
+    }
 
+    //reveals game grid
+    function showBoard() {
+        let grid = board.querySelectorAll(".cell-hidden");
+        for (i = 0; i < grid.length; i++) {
+            grid[i].classList.add("cell-shown");
+            grid[i].classList.remove("cell-hidden");
+        }
+    }
+
+    //hides the initial start screen
+    function hideStartScreen() {
+        startDiv.classList.add("new-game-form-hidden")
+        startDiv.classList.remove("new-game-form-shown")
+        const startDivHidden = document.querySelector(".new-game-form-hidden");
+        removeStart(startDivHidden);
+    }
+
+    //conrols animation transitions and removin start DIV from DOM
+    const promiseTransition = (div, property, value) =>
+        new Promise(resolve => {
+            div.style[property] = value;
+            const transitionEnded = e => {
+                if (e.propertyName !== property) return;
+                div.removeEventListener('transitionend', transitionEnded);
+                resolve();
+            }
+            div.addEventListener('transitionend', transitionEnded);
+        });
+
+
+    async function removeStart(startDivHidden) {
+        await promiseTransition(startDivHidden, "opacity", "0");
+        startDivHidden.remove();
+        GameDOM.populate();
+        setTimeout(showBoard, 1);
+    }
+
+    //controls display of each players piece
+    const displayPlayerPiece = (p1, p2) => {
+        const p1pieceDiv = document.querySelector(".player1-piece")
+        const p2pieceDiv = document.querySelector(".player2-piece")
+        p1pieceDiv.innerHTML = `<button class="${p1}" role="radio" type="button">${p1}</button>`
+        p2pieceDiv.innerHTML = `<button class="${p2}" role="radio" type="button">${p2}</button>`
+    }
+
+
+    //randomises players pieces
     const randomPiece = () => {
-
         let coinFlip = Math.round(Math.random());
         if (coinFlip === 0) {
             p1piece = player1.setPiece("X");
@@ -198,62 +219,36 @@ const gameState = (() => {
         }
     }
 
-    const displayPlayerPiece = (p1, p2) => {
-        const p1pieceDiv = document.querySelector(".player1-piece")
-        const p2pieceDiv = document.querySelector(".player2-piece")
-        p1pieceDiv.innerHTML = `<button class="${p1}" role="radio" type="button">${p1}</button>`
-        p2pieceDiv.innerHTML = `<button class="${p2}" role="radio" type="button">${p2}</button>`
-    }
-
+    //randomise who starts each round
     const whoStarts = () => {
-
         let coinFlip = Math.round(Math.random());
-        if (coinFlip === 0) return turn = p1name
-        else return turn = p2name;
-
+        if (coinFlip === 0) {
+            turn = p1name;
+            activeTurn();
+            return turn;
+        } else if (p2type == "AI") {
+            turn = p2name
+            activeTurn();
+            AImove();
+        } else return turn = p2name;
     };
 
+    //function for switching turns between players
     const nextTurn = () => {
-
         if (turn == p1name) {
             turn = p2name
-            turnTally++
-            turn = p2name;
+            if (p2type == "AI") AImove();
         }
         else if (turn == p2name) {
             turn = p1name
-            turnTally++
-            turn = p1name;
         }
         activeTurn();
         return turn;
     }
 
-    board.onmouseover = function (e) {
-        if (e.target.className == "cell-shown") {
-
-            if (turn == p1name) {
-                if (player1.getPiece() == "X") {
-                    e.target.classList.add('cell-hover-pink')
-                } else e.target.classList.add('cell-hover-green')
-            }
-            else if (turn == p2name) {
-                if (player2.getPiece() == "X") {
-                    e.target.classList.add('cell-hover-pink')
-                } else e.target.classList.add('cell-hover-green')
-            }
-        }
-        else return;
-    }
-
-    board.onmouseout = function (e) {
-        e.target.classList.remove('cell-hover-pink');
-        e.target.classList.remove('cell-hover-green')
-        return;
-    };
-
+    //click listener for placing pieces
     board.onclick = function (e) {
-        if ((e.target.className == "cell-shown cell-hover-pink") || (e.target.className == "cell-shown cell-hover-green")) {
+        if ((winner == "") && ((e.target.className == "cell-shown cell-hover-X") || (e.target.className == "cell-shown cell-hover-O"))) {
             if (!e.target.innerHTML) {
                 if (turn == p1name) {
                     placePiece(e, p1piece);
@@ -264,75 +259,25 @@ const gameState = (() => {
         else return;
     }
 
+    //place piece functionality
     function placePiece(e, piece) {
         gameArrayIndex = e.target.attributes.id.value;
         splitIndexValue = gameArrayIndex.split("");
         splitValueX = gameArrayIndex[0];
         splitValueY = gameArrayIndex[1];
-        MakeGame.board[splitValueX][splitValueY] = piece;
+        GameBoard.arr[splitValueX][splitValueY] = piece;
         e.target.innerHTML = piece;
-        if (turnTally > 3) {
-            winCondition();
-
-        }
+        turnTally++
+        if (turnTally > 4) {
+            if (winCondition()) {
+                whoStarts();
+                return;
+            };
+        };
         nextTurn();
     }
 
-    function winCondition() {
-        if (diagUpEqual() || diagDownEqual() || rowEqual() || columnEqual()) {
-            if (turn == p1name) {
-                player1.addPoint();
-                updateScore('player1', player1.getScore());
-                turnTally = 0;
-                GameBoard.populate();
-            }
-            else {
-                player2.addPoint();
-                updateScore('player2', player2.getScore())
-                turnTally = 0;
-                GameBoard.populate();
-            }
-
-            return;
-        }
-        else if (turnTally > 7) {
-            GameBoard.populate();
-            turnTally = 0;
-            return;
-        }
-        return;
-    };
-
-    const diagUpEqual = () => ((MakeGame.board[0][0] === MakeGame.board[1][1]) && (MakeGame.board[0][0] === MakeGame.board[2][2]))
-
-    const diagDownEqual = () => ((MakeGame.board[0][2] === MakeGame.board[1][1]) && (MakeGame.board[0][2] === MakeGame.board[2][0]))
-
-    const rowEqual = function () {
-        for (i = 0; i < MakeGame.board.length; i++) {
-            if (xCheck(MakeGame.board[i])) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    const columnEqual = function () {
-        for (i = 0; i < MakeGame.board[0].length; i++) {
-            if ((MakeGame.board[0][i] === MakeGame.board[1][i]) && (MakeGame.board[0][i] === MakeGame.board[2][i])) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    const xCheck = arr => arr.every(val => val === arr[0]);
-
-    const updateScore = (player, score) => {
-        const scoreDiv = document.querySelector(`.${player}-score`)
-        scoreDiv.innerText = score;
-        return;
-    }
-
+    //highlights whose turn is active
     const activeTurn = () => {
         const p1board = document.querySelector(".player1-info")
         const p2board = document.querySelector(".player2-info")
@@ -345,5 +290,275 @@ const gameState = (() => {
         }
     }
 
-})();
+    //randomise AI starting move to best squares
+    function AIstartingMove() {
+        startingMove = ["00", "02", "11", "20", "22"]
+        let randomStartIndex = Math.floor(Math.random() * startingMove.length);
+        return startingMove[randomStartIndex]
+    }
 
+
+    //overall AI move control function
+    const AImove = () => {
+
+        if (turnTally > 8) return;
+
+        if (turnTally == 0) {
+            let startingMove = AIstartingMove()
+            AIplaceDOM(startingMove)
+        }
+        if (turnTally > 0) {
+            let bestMove = minimax(GameBoard.arr, p2piece);
+            AIplaceDOM(bestMove.index)
+        }
+        turnTally++
+
+        if (turnTally > 4) {
+            if (winCondition()) {
+                whoStarts();
+                return;
+            };
+        };
+
+        nextTurn();
+    }
+
+
+    //responsible for showin the move in the DOM
+    function AIplaceDOM(move) {
+        AImoveCoOrds = move.toString().split("");
+        let xMove = AImoveCoOrds[0]
+        let yMove = AImoveCoOrds[1]
+        GameBoard.arr[xMove][yMove] = p2piece
+        let placeDOM = document.getElementById(`${xMove}${yMove}`)
+        placeDOM.innerHTML = p2piece
+        return;
+    }
+
+    //announces winner in centre square
+    function announceWinner(player) {
+        let announceCell = document.getElementById("11")
+        announceCell.innerHTML = `${player} wins!`
+        winner = player
+        announceCell.onclick = function () {
+            winner = "";
+            GameDOM.populate();
+            turnTally = 0;
+            whoStarts()
+        }
+
+    }
+
+    //announces draw in centre square
+    function announceDraw() {
+        let announceCell = document.getElementById("11")
+        announceCell.innerHTML = `Tie! Nobody wins.`
+        winner = "none"
+        announceCell.onclick = function () {
+            winner = "";
+            GameDOM.populate();
+            turnTally = 0;
+            whoStarts();
+        }
+
+    }
+
+    //Point control function
+    function winnerFound(player) {
+        player.addPoint()
+        updateScore(player.num, player.getScore());
+        announceWinner(turn);
+    }
+
+    //updates scoreboard display
+    const updateScore = (player, score) => {
+        const scoreDiv = document.querySelector(`.${player}-score`)
+        scoreDiv.innerText = score;
+        return;
+    }
+
+    //Game end state control function
+    function winCondition() {
+        if (checkWinner(GameBoard.arr, p1piece)) {
+            winnerFound(player1)
+            return;
+        }
+        else if (checkWinner(GameBoard.arr, p2piece)) {
+            winnerFound(player2)
+            return;
+        };
+        if (turnTally > 8) { //evaluates draw
+            announceDraw();
+            return;
+        }
+    };
+
+    //evaluates whether win has occurred, also used by AI for working out their best move.
+    function checkWinner(board, player, theory) {
+
+        const diagDownEqual = (board, player) => {
+            if ((board[0][0] === player) && (board[0][0] === board[1][1]) && (board[0][0] === board[2][2])) {
+                if (theory !== "yes") { //if theory = "yes", AI is calculating best move and therefore winning highlight should not be applied.
+                    for (let i = 0; i < 3; i++) {
+                        let cell = document.getElementById(`${i}${i}`)
+                        cell.classList.add(`cell-win-${player}`)
+                    }
+                    return true;
+                }
+                return true;
+            }
+        }
+
+        const diagUpEqual = (board, player) => {
+            if ((board[0][2] === player) && (board[0][2] === board[1][1]) && (board[0][2] === board[2][0])) {
+                if (theory !== "yes") { //if theory = "yes", AI is calculating best move and therefore winning highlight should not be applied.
+                    let cells = [];
+                    cells.push(document.getElementById(`02`))
+                    cells.push(document.getElementById(`11`))
+                    cells.push(document.getElementById(`20`))
+                    for (let i = 0; i < 3; i++) {
+                        cells[i].classList.add(`cell-win-${player}`)
+                    }
+                    return true;
+                }
+                return true;
+            }
+        }
+
+        const rowEqual = function (board, player) {
+            const xCheck = (board, player) => board.every(val => val === player);
+            for (i = 0; i < board.length; i++) {
+                if (xCheck(board[i], player)) {
+                    if (theory !== "yes") { //if theory = "yes", AI is calculating best move and therefore winning highlight should not be applied.
+                        for (j = 0; j < board[i].length; j++) {
+                            let cell = document.getElementById(`${i}${j}`)
+                            cell.classList.add(`cell-win-${player}`)
+                        }
+                        return true;
+                    }
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        const columnEqual = function (board, player) {
+            for (let i = 0; i < board[0].length; i++) {
+                if ((board[0][i] === player) && (board[0][i] === board[1][i]) && (board[0][i] === board[2][i])) {
+                    if (theory !== "yes") { //if theory = "yes", AI is calculating best move and therefore winning highlight should not be applied.
+                        for (let j = 0; j < board[0].length; j++) {
+                            let cell = document.getElementById(`${j}${i}`)
+                            cell.classList.add(`cell-win-${player}`)
+                        }
+                        return true;
+                    }
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        if ((diagUpEqual(board, player)) || (diagDownEqual(board, player)) || (rowEqual(board, player)) || (columnEqual(board, player))) {
+            return true
+        }
+        else return false;
+    }
+
+    //creates 2D array of available spaces to play
+    function emptySpace(arr) {
+        const freeSpaceArray = [];
+        for (i = 0; i < arr.length; i++) {
+            for (j = 0; j < arr[i].length; j++) {
+                if ((arr[i][j] != "X") && (arr[i][j] != "O")) {
+                    freeSpaceArray.push(arr[i][j]);
+                }
+            }
+        }
+        return freeSpaceArray;
+    }
+
+    //minimax AI function
+    function minimax(newBoard, player, depth = 0) {
+
+        let availSpots = emptySpace(GameBoard.arr);
+
+        if (checkWinner(newBoard, p1piece, "yes")) {
+            return { score: depth - 100 };
+        } else if (checkWinner(newBoard, p2piece, "yes")) {
+            return { score: 100 - depth };
+        } else if (availSpots.length == 0) {
+            return { score: 0 };
+        }
+        let moves = [];
+        for (let i = 0; i < availSpots.length; i++) {
+            let move = {};
+            splitCoOrds = availSpots[i].toString().split("");
+            let xCoOrd = splitCoOrds[0]
+            let yCoOrd = splitCoOrds[1]
+            move.index = newBoard[xCoOrd][yCoOrd]
+            newBoard[xCoOrd][yCoOrd] = player
+
+            //recursive function call
+            if (player == p2piece) {
+                result = minimax(newBoard, p1piece, depth + 1);
+                move.score = result.score;
+            } else {
+                result = minimax(newBoard, p2piece, depth + 1);
+                move.score = result.score;
+            };
+
+            //test to reset the board position to empty depending on coordinates            
+            let splitCoOrds2 = availSpots[i].toString().split("");
+            let xCoOrd2 = splitCoOrds2[0];
+            let yCoOrd2 = splitCoOrds2[1];
+            newBoard[xCoOrd2][yCoOrd2] = move.index
+            moves.push(move);
+        }
+
+        let bestMove;
+
+        if (player === p2piece) {
+            let bestScore = -10000;
+            for (let i = 0; i < moves.length; i++) {
+                if (moves[i].score > bestScore) {
+                    bestScore = moves[i].score;
+                    bestMove = i;
+                }
+            }
+        } else {
+            let bestScore = 10000;
+            for (let i = 0; i < moves.length; i++) {
+                if (moves[i].score < bestScore) {
+                    bestScore = moves[i].score;
+                    bestMove = i;
+                }
+            }
+        }
+        return moves[bestMove];
+    }
+
+    //highlight cell function
+    board.onmouseover = function (e) {
+        if (e.target.className == "cell-shown") {
+            if (turn == p1name) {
+                if (player1.getPiece() == "X") {
+                    e.target.classList.add('cell-hover-X')
+                } else e.target.classList.add('cell-hover-O')
+            }
+            else if ((turn == p2name) && (p2type == "human")) {
+                if (player2.getPiece() == "X") {
+                    e.target.classList.add('cell-hover-X')
+                } else e.target.classList.add('cell-hover-O')
+            }
+        }
+        else return;
+    }
+    
+    //unhighlight cell function
+    board.onmouseout = function (e) {
+        e.target.classList.remove('cell-hover-X');
+        e.target.classList.remove('cell-hover-O')
+        return;
+    };
+
+})();
