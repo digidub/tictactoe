@@ -89,19 +89,6 @@ const Player = (playerName) => {
         return score;
     }
 
-    function emptySpace() {
-        const freeSpaceArray = [];
-        for (i = 0; i < MakeGame.board.length; i++) {
-            for (j = 0; j < MakeGame.board[i].length; j++) {
-                if ((MakeGame.board[i][j] != "X") && (MakeGame.board[i][j] != "O")) {
-                    freeSpaceArray.push(MakeGame.board[i][j]);
-                }
-            }
-        }
-        return freeSpaceArray;
-    }
-
-
     return {
 
         setName,
@@ -109,8 +96,7 @@ const Player = (playerName) => {
         getName,
         getPiece,
         getScore,
-        addPoint,
-        emptySpace
+        addPoint,       
 
     };
 }
